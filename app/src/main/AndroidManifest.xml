@@ -17,7 +17,7 @@
             android:name="design_height_in_dp"
             android:value="360"/>
         <activity
-            android:name=".MainActivity"
+            android:name=".ui.view.MainActivity"
             android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />

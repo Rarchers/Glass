@@ -1,10 +1,11 @@
-package com.example.glass;
+package com.example.glass.ui.view;
 
 import androidx.appcompat.app.AppCompatActivity;
 
 import android.app.Activity;
 import android.os.Bundle;
 
+import com.example.glass.R;
 import com.rokid.glass.instruct.VoiceInstruction;
 import com.rokid.glass.instruct.entity.EntityKey;
 import com.rokid.glass.instruct.entity.IInstructReceiver;
