@@ -1,6 +1,7 @@
 package com.example.glass.component.ultraviolet.net;
 
 public interface OnMsgReturnedListener {
-    void onMsgReturned(String msg);
+    void onMsgReturned(Object msg);
     void onError(Exception ex);
+    void onStateMsg(String state);
 }

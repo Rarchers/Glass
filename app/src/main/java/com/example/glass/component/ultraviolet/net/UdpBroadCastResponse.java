@@ -1,7 +1,11 @@
 package com.example.glass.component.ultraviolet.net;
 
+import com.example.glass.component.ultraviolet.bean.TagBroadCastPacket;
+import com.example.glass.component.ultraviolet.bean.TagBroadCastPacketAnalysis;
+
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
+import java.util.Arrays;
 
 public class UdpBroadCastResponse extends Thread{
 
@@ -23,10 +27,14 @@ public class UdpBroadCastResponse extends Thread{
                 socket = new DatagramSocket(ANDROID_IP_PORT);
                 while(!isFinish) {
                     //监听回送端口
-                    byte[] buf = new byte[512];
+                    byte[] buf = new byte[1024];
                     DatagramPacket packet = new DatagramPacket(buf, buf.length);
                     //拿数据
                     socket.receive(packet);
+
+                    TagBroadCastPacket packet1 = TagBroadCastPacketAnalysis.analysis(buf);
+
+                    listener.onStateMsg("head:"+ Arrays.toString(packet1.getHead()));
 
                     //拿到发送端的一些信息
                     String ip = packet.getAddress().getHostAddress();
@@ -35,7 +43,7 @@ public class UdpBroadCastResponse extends Thread{
 
                     String msg = new String(buf, 0, length);
                     System.out.println("监听到: " + ip + "\tport: " + port + "\t信息: " + msg);
-                    listener.onMsgReturned(msg);
+                    listener.onMsgReturned(packet1);
                 }
 
             }catch (Exception e){

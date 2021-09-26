@@ -3,6 +3,9 @@ package com.example.glass.ui.view;
 import androidx.appcompat.app.AppCompatActivity;
 
 import android.app.Activity;
+import android.content.Context;
+import android.net.wifi.WifiInfo;
+import android.net.wifi.WifiManager;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.Button;
@@ -10,9 +13,11 @@ import android.widget.TextView;
 
 import com.example.glass.R;
 
+import com.example.glass.component.ultraviolet.bean.TagBroadCastPacket;
 import com.example.glass.component.ultraviolet.net.OnMsgReturnedListener;
 import com.example.glass.component.ultraviolet.net.UDPBroadCast;
 import com.example.glass.component.ultraviolet.net.UdpBroadCastResponse;
+import com.example.glass.utils.IpAddress;
 import com.rokid.glass.instruct.VoiceInstruction;
 import com.rokid.glass.instruct.entity.EntityKey;
 import com.rokid.glass.instruct.entity.IInstructReceiver;
@@ -46,17 +51,29 @@ public class MainActivity extends AppCompatActivity {
         getIp.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                String queryPacket = "";
+                builder.append("开始组装ip地址请求...\n");
+                info.setText(builder.toString());
 
-                UDPBroadCast.queryIP(queryPacket);
+                TagBroadCastPacket requestIp = new TagBroadCastPacket();
+                requestIp.setHead("ABCD".getBytes());
+                requestIp.setIp(IpAddress.getLocalIpAddress());
+                requestIp.setIsModifyCameraIp(new byte[]{0});
+
+                builder.append("发送的数据包：\n");
+                builder.append(requestIp.toString());
+                builder.append("\n");
+                info.setText(builder.toString());
 
 
+
+                //接收数据
                 new UdpBroadCastResponse(new OnMsgReturnedListener() {
                     @Override
-                    public void onMsgReturned(String msg) {
+                    public void onMsgReturned(Object msg) {
                         builder.append("获取到紫外相机IP地址udp广播包 \n");
-                        builder.append("包内容：\n");
-                        builder.append(msg);
+                        TagBroadCastPacket packet = (TagBroadCastPacket) msg;
+                        builder.append("解析包内容：\n");
+                        builder.append(packet.toString());
                         builder.append("\n");
                         info.setText(builder.toString());
                     }
@@ -68,12 +85,14 @@ public class MainActivity extends AppCompatActivity {
                         builder.append("\n");
                         info.setText(builder.toString());
                     }
+
+                    @Override
+                    public void onStateMsg(String state) {
+                        builder.append(state);
+                        builder.append("\n");
+                        info.setText(builder.toString());
+                    }
                 }).start();
-
-
-
-
-
 
             }
         });
