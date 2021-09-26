@@ -4,8 +4,15 @@ import androidx.appcompat.app.AppCompatActivity;
 
 import android.app.Activity;
 import android.os.Bundle;
+import android.view.View;
+import android.widget.Button;
+import android.widget.TextView;
 
 import com.example.glass.R;
+
+import com.example.glass.component.ultraviolet.net.OnMsgReturnedListener;
+import com.example.glass.component.ultraviolet.net.UDPBroadCast;
+import com.example.glass.component.ultraviolet.net.UdpBroadCastResponse;
 import com.rokid.glass.instruct.VoiceInstruction;
 import com.rokid.glass.instruct.entity.EntityKey;
 import com.rokid.glass.instruct.entity.IInstructReceiver;
@@ -13,17 +20,64 @@ import com.rokid.glass.instruct.entity.InstructEntity;
 
 public class MainActivity extends AppCompatActivity {
 
+    private Button getIp;
+    private TextView info;
+
+    private final StringBuilder builder = new StringBuilder();
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
         initInstruct();
+        initView();
 
 
     }
 
 
+    public void initView(){
+        getIp = findViewById(R.id.getIP);
+        info = findViewById(R.id.information);
+
+
+
+        getIp.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                String queryPacket = "";
+
+                UDPBroadCast.queryIP(queryPacket);
+
+
+                new UdpBroadCastResponse(new OnMsgReturnedListener() {
+                    @Override
+                    public void onMsgReturned(String msg) {
+                        builder.append("获取到紫外相机IP地址udp广播包 \n");
+                        builder.append("包内容：\n");
+                        builder.append(msg);
+                        builder.append("\n");
+                        info.setText(builder.toString());
+                    }
+
+                    @Override
+                    public void onError(Exception ex) {
+                        builder.append("获取IP发生错误：\n");
+                        builder.append(ex.toString());
+                        builder.append("\n");
+                        info.setText(builder.toString());
+                    }
+                }).start();
+
+
+
+
+
+
+            }
+        });
+    }
 
 
     public void initInstruct(){

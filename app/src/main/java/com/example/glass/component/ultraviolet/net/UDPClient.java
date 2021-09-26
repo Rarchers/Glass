@@ -5,8 +5,7 @@ import java.net.DatagramSocket;
 import java.net.InetAddress;
 
 public class UDPClient {
-    public final static int CAMERA_IP_PORT = 60000;
-    public final static int ANDROID_IP_PORT = 60080;
+
     public final static int CAMERA_PARAM_PORT = 60002;
     public final static int ANDROID_PARAM_PORT = 60082;
 
