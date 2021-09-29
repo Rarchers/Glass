@@ -3,9 +3,7 @@ package com.example.glass.ui.view;
 import androidx.appcompat.app.AppCompatActivity;
 
 import android.app.Activity;
-import android.content.Context;
-import android.net.wifi.WifiInfo;
-import android.net.wifi.WifiManager;
+import android.content.Intent;
 import android.os.Bundle;
 import android.os.RemoteException;
 import android.util.Log;
@@ -16,16 +14,7 @@ import android.widget.Toast;
 
 import com.example.glass.R;
 
-import com.example.glass.component.ultraviolet.bean.TagBroadCastPacket;
-import com.example.glass.component.ultraviolet.net.OnMsgReturnedListener;
-import com.example.glass.component.ultraviolet.net.UDP;
-import com.example.glass.component.ultraviolet.net.UDPBroadCast;
-import com.example.glass.component.ultraviolet.net.UDPClient;
-import com.example.glass.component.ultraviolet.net.UDPClientResponse;
-import com.example.glass.component.ultraviolet.net.UdpBroadCastResponse;
-import com.example.glass.utils.IpAddress;
 import com.rokid.glass.instruct.InstructLifeManager;
-import com.rokid.glass.instruct.VoiceInstruction;
 import com.rokid.glass.instruct.entity.EntityKey;
 import com.rokid.glass.instruct.entity.IInstructReceiver;
 import com.rokid.glass.instruct.entity.InstructEntity;
@@ -33,9 +22,6 @@ import com.rokid.glass.speech.AsrCallBack;
 import com.rokid.glass.speech.SpeechUserManager;
 import com.rokid.glass.speech.TtsCallBack;
 import com.rokid.glass.ui.button.GlassButton;
-
-import java.nio.charset.StandardCharsets;
-import java.util.Arrays;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -69,6 +55,7 @@ public class MainActivity extends AppCompatActivity {
                 builder.append("点击了测试按钮\n");
                 info.setText(builder.toString());
                 Toast.makeText(MainActivity.this, "点击测试", Toast.LENGTH_SHORT).show();
+                startActivity(  new Intent(MainActivity.this,UltravioletActivity.class));
             }
         });
 

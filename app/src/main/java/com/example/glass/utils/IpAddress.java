@@ -5,7 +5,11 @@ import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.net.wifi.WifiInfo;
 import android.net.wifi.WifiManager;
+import android.text.format.Formatter;
 
+import com.example.glass.component.ultraviolet.net.OnMsgReturnedListener;
+
+import java.lang.ref.WeakReference;
 import java.net.Inet4Address;
 import java.net.InetAddress;
 import java.net.NetworkInterface;
@@ -15,43 +19,6 @@ import java.util.Enumeration;
 import java.util.List;
 
 public class IpAddress {
-    public static byte[] getLocalIpAddress() {
-        try {
-            for (Enumeration<NetworkInterface> en = NetworkInterface
-                    .getNetworkInterfaces(); en.hasMoreElements();) {
-                NetworkInterface intf = en.nextElement();
-                for (Enumeration<InetAddress> enumIpAddr = intf
-                        .getInetAddresses(); enumIpAddr.hasMoreElements();) {
-                    InetAddress inetAddress = enumIpAddr.nextElement();
-                    if (!inetAddress.isLoopbackAddress()) {
-                        return inetAddress.getAddress();
-                    }
-                }
-            }
-        } catch (SocketException ex) {
-
-        }
-        return null;
-    }
-
-    public static String getLocalIpAddressString() {
-        try {
-            for (Enumeration<NetworkInterface> en = NetworkInterface
-                    .getNetworkInterfaces(); en.hasMoreElements();) {
-                NetworkInterface intf = en.nextElement();
-                for (Enumeration<InetAddress> enumIpAddr = intf
-                        .getInetAddresses(); enumIpAddr.hasMoreElements();) {
-                    InetAddress inetAddress = enumIpAddr.nextElement();
-                    if (!inetAddress.isLoopbackAddress()) {
-                        return inetAddress.getHostAddress();
-                    }
-                }
-            }
-        } catch (SocketException ex) {
-
-        }
-        return null;
-    }
 
     public static String getIPv4Address(){
         try{
@@ -70,4 +37,6 @@ public class IpAddress {
 
         return "null";
     }
+
 }
+

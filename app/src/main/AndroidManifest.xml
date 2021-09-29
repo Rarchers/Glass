@@ -3,10 +3,11 @@
     package="com.example.glass">
 
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
-    <uses-permission android:name="android.permission.INTERNET"/>
-    <uses-permission android:name="android.permission.ACCESS_WIFI_STATE"></uses-permission>
-    <uses-permission android:name="android.permission.CHANGE_WIFI_STATE"></uses-permission>
-    <uses-permission android:name="android.permission.WAKE_LOCK"></uses-permission>
+    <uses-permission android:name="android.permission.INTERNET" />
+    <uses-permission android:name="android.permission.ACCESS_WIFI_STATE" />
+    <uses-permission android:name="android.permission.CHANGE_WIFI_STATE" />
+    <uses-permission android:name="android.permission.WAKE_LOCK" />
+
     <application
         android:name=".application.InstructionApplication"
         android:allowBackup="true"
@@ -15,13 +16,17 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/Theme.Glass">
+        <activity
+            android:name=".ui.view.UltravioletActivity"
+            android:exported="true" />
 
         <meta-data
             android:name="design_width_in_dp"
-            android:value="640"/>
+            android:value="640" />
         <meta-data
             android:name="design_height_in_dp"
-            android:value="360"/>
+            android:value="360" />
+
         <activity
             android:name=".ui.view.MainActivity"
             android:exported="true">
