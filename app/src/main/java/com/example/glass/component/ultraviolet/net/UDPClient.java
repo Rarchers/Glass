@@ -1,5 +1,9 @@
 package com.example.glass.component.ultraviolet.net;
 
+import static android.content.ContentValues.TAG;
+
+import android.util.Log;
+
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
 import java.net.InetAddress;
@@ -7,15 +11,17 @@ import java.net.InetAddress;
 public class UDPClient {
 
     public final static int CAMERA_PARAM_PORT = 60002;
-    public final static int ANDROID_PARAM_PORT = 60082;
+
 
     private InetAddress mServerAddress; //服务端的IP
     private DatagramSocket mSocket;
 
-    public UDPClient(String mServerIp) {
+
+    public UDPClient() {
         try {
-            mServerAddress = InetAddress.getByName(mServerIp);
+            mServerAddress = InetAddress.getByName("192.168.1.195");
             mSocket = new DatagramSocket();
+
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -32,22 +38,26 @@ public class UDPClient {
                 try {
                     //下面一大堆和服务端的代码基本上一样，无非就是一个是从控制台输的数据，一个从页面输的
                     byte[] clientMsgBytes = msg.getBytes();
+
                     DatagramPacket clientPacket = new DatagramPacket(clientMsgBytes,
                             clientMsgBytes.length,
                             mServerAddress,
                             CAMERA_PARAM_PORT);
                     mSocket.send(clientPacket);
-                    byte[] buf = new byte[1024];
-                    DatagramPacket serverMsgPacket = new DatagramPacket(buf, buf.length);
-                    mSocket.receive(serverMsgPacket);
-                    String serverMsg = new String(serverMsgPacket.getData(), 0, serverMsgPacket.getLength());
-                    listener.onMsgReturned(serverMsg);//收到的服务端消息
+                    listener.onStateMsg("发送到：192.168.1.195\n"+"发送到端口："+CAMERA_PARAM_PORT+"\n发送数据："+msg);
+
                 } catch (Exception e) {
                     listener.onError(e);
                 }
             }
         }.start();
     }
+
+
+
+
+
+
 
 
     public void onDestroy(){

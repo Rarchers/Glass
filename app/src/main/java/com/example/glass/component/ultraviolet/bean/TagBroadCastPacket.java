@@ -16,6 +16,20 @@ public class TagBroadCastPacket {
     byte[] reserved;
 
 
+    public TagBroadCastPacket() {
+        head = new byte[4];
+        ip = new byte[4];
+        mac = new byte[8];
+        id = new byte[8];
+        isModifyCameraIp = new byte[1];
+        reserved1 = new byte[3];
+        modifyIp = new byte[4];
+        modifyGateway = new byte[4];
+        modifySubnet = new byte[4];
+        pcSearchIpPort = 60080;
+        reserved = new byte[104];
+    }
+
     public byte[] getHead() {
         return head;
     }
