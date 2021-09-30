@@ -95,7 +95,13 @@ public class UltravioletActivity extends AppCompatActivity {
         builder.append(msg);
         builder.append("\n");
       //  builder.append("</font>");
-        information.setText(builder.toString());
+        runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                information.setText(builder.toString());
+            }
+        });
+
     }
 
     @Override
