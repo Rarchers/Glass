@@ -25,11 +25,11 @@ import com.rokid.glass.ui.button.GlassButton;
 
 public class MainActivity extends AppCompatActivity {
 
-    private Button getIp;
-    private TextView info;
+
     private InstructLifeManager mLifeManager;
     private SpeechUserManager mSpeechManager;
-    private GlassButton testButton;
+    private GlassButton ultraviolet;
+    private GlassButton infrared;
     private StringBuilder builder = new StringBuilder();
     private String TAG ="AUDIO";
 
@@ -45,26 +45,28 @@ public class MainActivity extends AppCompatActivity {
 
 
     public void initView(){
-        getIp = findViewById(R.id.getIP);
-        info = findViewById(R.id.information);
-        testButton = findViewById(R.id.custom_dialog_btn);
+       ultraviolet = findViewById(R.id.ultravioletButton);
+       infrared = findViewById(R.id.infraredButton);
 
-        testButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                builder.append("点击了测试按钮\n");
-                info.setText(builder.toString());
-                Toast.makeText(MainActivity.this, "点击测试", Toast.LENGTH_SHORT).show();
-                startActivity(  new Intent(MainActivity.this,UltravioletActivity.class));
-            }
-        });
 
-        getIp.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
+       ultraviolet.setClickable(true);
+       infrared.setClickable(true);
 
-            }
-        });
+       ultraviolet.setOnClickListener(new View.OnClickListener() {
+           @Override
+           public void onClick(View v) {
+               Intent intent = new Intent(MainActivity.this,UltravioletActivity.class);
+               startActivity(intent);
+           }
+       });
+
+       infrared.setOnClickListener(new View.OnClickListener() {
+           @Override
+           public void onClick(View v) {
+               Intent intent = new Intent(MainActivity.this,InfraredActivity.class);
+               startActivity(intent);
+           }
+       });
     }
 
     public void configInstruct() {

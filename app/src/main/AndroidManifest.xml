@@ -17,6 +17,9 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.Glass">
         <activity
+            android:name=".ui.view.InfraredActivity"
+            android:exported="true" />
+        <activity
             android:name=".ui.view.UltravioletActivity"
             android:exported="true" />
 
