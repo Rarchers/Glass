@@ -25,9 +25,13 @@ public class UDPClient {
     private OnMsgReturnedListener listener;
     private DatagramPacket dpReceive = null;
     private boolean scanFinish = false;
+    private volatile boolean shutdown = false;
+    private SendThread sendThread;
+    private ReceiveThread receiveThread;
 
-    public UDPClient(Context context,String message, OnMsgReturnedListener listener) {
+    public UDPClient(OnMsgReturnedListener listener) {
         try {
+            this.listener = listener;
             mServerAddress = InetAddress.getByName(BROADCAST_IP);
             String ipv4 = IpAddress.getIPv4Address();
             listener.onStateMsg("当前客户端ip地址："+ipv4);
@@ -52,17 +56,23 @@ public class UDPClient {
 //                }
 //            }).start();
             try{
-                listener.onStateMsg("开启发送线程...");
-                new SendThread(listener,message).start();
                 listener.onStateMsg("开启接受线程...");
                 receiveSocket = new DatagramSocket(ANDROID_PARAM_PORT);
-                new ReceiveThread(listener).start();
+                receiveThread = new ReceiveThread(listener);
+                receiveThread.start();
             }catch (Exception e){
                 listener.onError(e);
             }
         } catch (Exception e) {
             e.printStackTrace();
         }
+    }
+
+
+    public void sendMessage(String msg){
+        listener.onStateMsg("开启发送线程...");
+        sendThread = new SendThread(listener,msg);
+        sendThread.start();
     }
 
 
@@ -77,12 +87,14 @@ public class UDPClient {
         @Override
         public void run() {
             super.run();
+            try{
             DatagramPacket dpSend = null;
             byte[] data = sendMsg.getBytes();
             dpSend = new DatagramPacket(data,0,data.length,mServerAddress,CAMERA_PARAM_PORT);
-
-            try{
                 sendSocket = new DatagramSocket();
+
+
+
                 sendSocket.send(dpSend);
                 listener.onStateMsg("发送数据(utf-8)："+sendMsg);
                 listener.onStateMsg("发送数据(byte)："+ Arrays.toString(data));
@@ -90,6 +102,7 @@ public class UDPClient {
             }catch (Exception e){
                 listener.onError(e);
             }
+
         }
     }
 
@@ -105,7 +118,7 @@ public class UDPClient {
         @Override
         public void run() {
             super.run();
-            while (true){
+            while (!shutdown){
                 String receiveContent = null;
                 byte[] buf = new byte[1024];
                 dpReceive = new DatagramPacket(buf, buf.length);
@@ -125,6 +138,23 @@ public class UDPClient {
         }
     }
 
+
+    public void closeAll(){
+        if (receiveSocket !=null ){
+            shutdown = true;
+            receiveSocket.close();
+            if (receiveThread != null)
+                receiveThread.interrupt();
+        }
+
+        if (sendSocket != null){
+            sendSocket.close();
+            if (sendThread != null)
+                sendThread.interrupt();
+        }
+
+
+    }
 
 
 

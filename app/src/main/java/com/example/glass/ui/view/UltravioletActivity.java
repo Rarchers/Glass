@@ -11,12 +11,16 @@ import android.widget.TextView;
 import com.example.glass.R;
 import com.example.glass.component.ultraviolet.net.OnMsgReturnedListener;
 import com.example.glass.component.ultraviolet.net.UDPClient;
+import com.rokid.glass.ui.button.GlassButton;
+
+import java.util.Arrays;
 
 public class UltravioletActivity extends AppCompatActivity {
 
 
-    private Button send;
+    private GlassButton send;
     private TextView information;
+    private UDPClient client;
 
     private volatile StringBuilder builder = new StringBuilder();
 
@@ -34,29 +38,36 @@ public class UltravioletActivity extends AppCompatActivity {
         send = findViewById(R.id.ultravioletButton);
         information = findViewById(R.id.ultravioletInformation);
 
+
+        client =  new UDPClient(new OnMsgReturnedListener() {
+            @Override
+            public void onMsgReturned(Object msg) {
+
+                setText((String)msg,0);
+            }
+
+            @Override
+            public void onError(Exception ex) {
+                setText(ex.toString(),1);
+                setText(Arrays.toString(ex.getStackTrace()),1);
+            }
+
+            @Override
+            public void onStateMsg(String state) {
+                setText(state,2);
+            }
+        });
+
+
+
+
+
+
         send.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
 
-               UDPClient client =  new UDPClient(UltravioletActivity.this,"sag 10\r\n",new OnMsgReturnedListener() {
-                    @Override
-                    public void onMsgReturned(Object msg) {
-
-                        setText((String)msg,0);
-                    }
-
-                    @Override
-                    public void onError(Exception ex) {
-                        setText(ex.toString(),1);
-                    }
-
-                    @Override
-                    public void onStateMsg(String state) {
-                        setText(state,2);
-                    }
-                });
-
-
+              client.sendMessage("sag 10\r\n");
 
 
             }
@@ -87,4 +98,12 @@ public class UltravioletActivity extends AppCompatActivity {
         information.setText(builder.toString());
     }
 
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        if (client != null){
+            client.closeAll();
+        }
+
+    }
 }
