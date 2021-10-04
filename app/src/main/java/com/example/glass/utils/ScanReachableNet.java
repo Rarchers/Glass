@@ -10,6 +10,8 @@ import android.text.format.Formatter;
 
 import com.example.glass.component.ultraviolet.net.OnMsgReturnedListener;
 
+import java.io.BufferedReader;
+import java.io.InputStreamReader;
 import java.lang.ref.WeakReference;
 import java.net.InetAddress;
 
@@ -38,17 +40,49 @@ public class ScanReachableNet extends Thread{
                 int ipAddress = connectionInfo.getIpAddress();
                 String ipString = Formatter.formatIpAddress(ipAddress);
                 String prefix = ipString.substring(0, ipString.lastIndexOf(".") + 1);
-                //listener.onStateMsg("发现以下局域网内ip");
-                for (int i = 0; i < 255; i++) {
-                    listener.onStateMsg("第"+i+"个");
-                    String testIp = prefix + String.valueOf(i);
-                    InetAddress address = InetAddress.getByName(testIp);
-                    boolean reachable = address.isReachable(1000);
-                    String hostName = address.getCanonicalHostName();
-                    if (reachable)
-                        listener.onStateMsg("Host: " + String.valueOf(hostName) + "(" + String.valueOf(testIp) + ") is reachable!");
+                listener.onStateMsg("发现以下局域网内ip");
+
+                listener.onStateMsg("当前扫描：192.168.1.195");
+                String testIp = prefix + String.valueOf(195);
+                InetAddress address = InetAddress.getByName(testIp);
+                boolean reachable = address.isReachable(1000);
+                String hostName = address.getCanonicalHostName();
+                if (reachable)
+                    listener.onStateMsg("Host: " + String.valueOf(hostName) + "(" + String.valueOf(testIp) + ") is reachable!");
+                else
+                    listener.onStateMsg("Host: " + String.valueOf(hostName) + "(" + String.valueOf(testIp) + ") is not reachable!");
+
+                listener.onStateMsg("开始执行ping命令确认是否ping通：");
+                Process p = Runtime.getRuntime().exec(
+                        "ping -c 5 -w 5 192.168.1.195");//
+                p.waitFor();
+                int status = p.exitValue();
+                InputStreamReader reader = new InputStreamReader(p.getInputStream());
+                BufferedReader bufferedReader = new BufferedReader(reader);
+                String line = "";
+                StringBuilder echo = new StringBuilder();
+                while ((line = bufferedReader.readLine()) != null){
+                    echo.append(line).append("\n");
                 }
-                listener.onStateMsg("扫描完成");
+
+                listener.onStateMsg("ping 结果：");
+                listener.onStateMsg(echo.toString());
+                if (status == 0){
+
+
+                    listener.onStateMsg("ping通过");
+                }else {
+
+
+
+                    listener.onStateMsg("ping失败");
+                }
+
+
+
+
+
+
                 listener.onMsgReturned(true);
             }
         } catch (Throwable t) {

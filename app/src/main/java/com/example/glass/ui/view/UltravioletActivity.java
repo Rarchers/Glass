@@ -10,6 +10,7 @@ import android.widget.TextView;
 
 import com.example.glass.R;
 import com.example.glass.component.ultraviolet.net.OnMsgReturnedListener;
+import com.example.glass.component.ultraviolet.net.TCPClient;
 import com.example.glass.component.ultraviolet.net.UDPClient;
 import com.rokid.glass.ui.button.GlassButton;
 
@@ -20,7 +21,8 @@ public class UltravioletActivity extends AppCompatActivity {
 
     private GlassButton send;
     private TextView information;
-    private UDPClient client;
+    private UDPClient udpClient;
+    private TCPClient tcpClient;
 
     private volatile StringBuilder builder = new StringBuilder();
 
@@ -39,7 +41,7 @@ public class UltravioletActivity extends AppCompatActivity {
         information = findViewById(R.id.ultravioletInformation);
 
 
-        client =  new UDPClient(new OnMsgReturnedListener() {
+        udpClient =  new UDPClient(this,new OnMsgReturnedListener() {
             @Override
             public void onMsgReturned(Object msg) {
 
@@ -63,11 +65,45 @@ public class UltravioletActivity extends AppCompatActivity {
 
 
 
+
+
+
+
+
         send.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                if (UDPClient.scanFinish){
 
-              client.sendMessage("sag 10\r\n");
+                    tcpClient = new TCPClient(new OnMsgReturnedListener() {
+                        @Override
+                        public void onMsgReturned(Object msg) {
+
+                            setText((String)msg,0);
+                        }
+
+                        @Override
+                        public void onError(Exception ex) {
+                            setText(ex.toString(),1);
+                            setText(Arrays.toString(ex.getStackTrace()),1);
+                        }
+
+                        @Override
+                        public void onStateMsg(String state) {
+                            setText(state,2);
+                        }
+                    });
+
+
+
+
+
+                    setText("\ntcp连接准备",2);
+                    tcpClient.startTcpReceive();
+                }else {
+                    setText("请等待确认紫外相机连接...",2);
+                }
+
 
 
             }
@@ -107,8 +143,12 @@ public class UltravioletActivity extends AppCompatActivity {
     @Override
     protected void onDestroy() {
         super.onDestroy();
-        if (client != null){
-            client.closeAll();
+        if (udpClient != null){
+            udpClient.closeAll();
+        }
+
+        if (tcpClient != null){
+            tcpClient.closeAll();
         }
 
     }
