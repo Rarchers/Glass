@@ -1,3 +1,5 @@
 <resources>
     <string name="app_name">Glass</string>
+    <string name="txtTuning_cn">加载中...</string>
+    <string name="Please_Connect_FLIR_One">请连接一个FLIR One设备</string>
 </resources>
