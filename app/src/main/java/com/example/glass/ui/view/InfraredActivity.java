@@ -49,6 +49,7 @@ import java.io.File;
 import java.nio.ByteBuffer;
 import java.text.NumberFormat;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.EnumSet;
 import java.util.Timer;
 import java.util.TimerTask;
@@ -104,7 +105,19 @@ public class InfraredActivity extends AppCompatActivity implements Device.Delega
         min.setText("最低");
         aver.setText("平均");
 
-
+        try {
+            Device.startDiscovery(this, this);
+        } catch (IllegalStateException e) {
+            setText("已经开始搜寻相机");
+            // it's okay if we've already started discovery
+        } catch (SecurityException e) {
+            setText(Arrays.toString(e.getStackTrace()));
+            // On some platforms, we need the user to select the app to give us permisison to the USB device.
+            Toast.makeText(this, "请插入一个Flir设备", Toast.LENGTH_LONG).show();
+            // There is likely a cleaner way to recover, but for now, exit the activity and
+            // wait for user to follow the instructions;
+            finish();
+        }
 
 
 
@@ -152,15 +165,17 @@ public class InfraredActivity extends AppCompatActivity implements Device.Delega
         super.onStart();
         thermalImageView = (ImageView) findViewById(R.id.imageView);
         //若未连接设备，则显示"请连接设备"
-        if (Device.getSupportedDeviceClasses(this).contains(FlirUsbDevice.class)) {
-            setText("未连接设备");
-            findViewById(R.id.pleaseConnect).setVisibility(View.VISIBLE);
-        }
+//        if (Device.getSupportedDeviceClasses(this).contains(FlirUsbDevice.class)) {
+//            setText("未连接设备");
+//            findViewById(R.id.pleaseConnect).setVisibility(View.VISIBLE);
+//        }
         try {
             Device.startDiscovery(this, this);
         } catch (IllegalStateException e) {
+            setText("已经开始搜寻相机");
             // it's okay if we've already started discovery
         } catch (SecurityException e) {
+            setText(Arrays.toString(e.getStackTrace()));
             // On some platforms, we need the user to select the app to give us permisison to the USB device.
             Toast.makeText(this, "请插入一个Flir设备", Toast.LENGTH_LONG).show();
             // There is likely a cleaner way to recover, but for now, exit the activity and
@@ -171,7 +186,7 @@ public class InfraredActivity extends AppCompatActivity implements Device.Delega
 
     @Override
     public void onTuningStateChanged(Device.TuningState tuningState) {
-
+        setText("当前相机状态："+tuningState);
         currentTuningState = tuningState;
         if (tuningState == Device.TuningState.InProgress) {
             runOnUiThread(new Thread() {
