@@ -30,6 +30,7 @@ public class MainActivity extends AppCompatActivity {
     private SpeechUserManager mSpeechManager;
     private GlassButton ultraviolet;
     private GlassButton infrared;
+    private GlassButton camera;
     private StringBuilder builder = new StringBuilder();
     private String TAG ="AUDIO";
 
@@ -47,10 +48,19 @@ public class MainActivity extends AppCompatActivity {
     public void initView(){
        ultraviolet = findViewById(R.id.ultravioletButton);
        infrared = findViewById(R.id.infraredButton);
+       camera = findViewById(R.id.cameraButton);
 
-
+       camera.setClickable(true);
        ultraviolet.setClickable(true);
        infrared.setClickable(true);
+
+       camera.setOnClickListener(new View.OnClickListener() {
+           @Override
+           public void onClick(View view) {
+               Intent intent = new Intent(MainActivity.this,CameraActivity.class);
+               startActivity(intent);
+           }
+       });
 
        ultraviolet.setOnClickListener(new View.OnClickListener() {
            @Override
