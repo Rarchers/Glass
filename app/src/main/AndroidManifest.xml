@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="com.example.glass">
+
     <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
     <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
     <uses-permission android:name="android.permission.ACCESS_LOCATION_EXTRA_COMMANDS" />
@@ -29,16 +30,29 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.Glass">
         <activity
+            android:name=".ui.view.CameraActivity"
+            android:exported="true" />
+        <activity
+            android:name=".ui.view.UltravioletSettingActivity"
+            android:exported="true" />
+        <activity
+            android:name=".ui.view.InfraredSettingActivity"
+            android:exported="true" />
+        <activity
+            android:name=".ui.view.SettingActivity"
+            android:exported="true" />
+        <activity
             android:name=".ui.view.InfraredActivity"
-            android:launchMode="singleInstance"
-            android:exported="true">
+            android:exported="true"
+            android:launchMode="singleInstance">
             <intent-filter>
                 <action android:name="android.hardware.usb.action.USB_DEVICE_ATTACHED" />
             </intent-filter>
-            <meta-data android:name="android.hardware.usb.action.USB_DEVICE_ATTACHED"
-                android:resource="@xml/device_filter" />
 
-    </activity>
+            <meta-data
+                android:name="android.hardware.usb.action.USB_DEVICE_ATTACHED"
+                android:resource="@xml/device_filter" />
+        </activity>
         <activity
             android:name=".ui.view.UltravioletActivity"
             android:exported="true" />
