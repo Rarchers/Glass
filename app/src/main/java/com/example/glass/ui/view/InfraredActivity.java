@@ -108,7 +108,8 @@ public class InfraredActivity extends AppCompatActivity implements Device.Delega
         try {
             Device.startDiscovery(this, this);
         } catch (IllegalStateException e) {
-            setText("已经开始搜寻相机");
+            setText("开始搜寻相机，请确保相机已开机并连接");
+            setText("若长时间无画面请检查相机后重新进入此页面...");
             // it's okay if we've already started discovery
         } catch (SecurityException e) {
             setText(Arrays.toString(e.getStackTrace()));
