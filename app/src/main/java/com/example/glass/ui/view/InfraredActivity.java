@@ -30,6 +30,7 @@ import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.ProgressBar;
+import android.widget.ScrollView;
 import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -69,6 +70,7 @@ public class InfraredActivity extends AppCompatActivity implements Device.Delega
     private int width;
     private int height;
     private short[] thermalPixels;
+    private ScrollView scrollView;
     private Device.TuningState currentTuningState = Device.TuningState.Unknown;
     private double maxTemp, meantTemp,minTemp;//最高-平均温度
 
@@ -85,6 +87,7 @@ public class InfraredActivity extends AppCompatActivity implements Device.Delega
         this.requestWindowFeature(Window.FEATURE_NO_TITLE);
         setContentView(R.layout.carriageaxletemperature);
         information = findViewById(R.id.infraredInfo);
+        scrollView = findViewById(R.id.scrollviewInfrared);
 
        // Intent serviceIntent = new Intent(InfraredActivity.this, UpLoadService.class);
         //startService(serviceIntent);
@@ -173,10 +176,10 @@ public class InfraredActivity extends AppCompatActivity implements Device.Delega
         try {
             Device.startDiscovery(this, this);
         } catch (IllegalStateException e) {
-            setText("已经开始搜寻相机");
+            setText("开始搜寻相机，请确保相机已开机并连接");
+            setText("若长时间无画面请检查相机后重新进入此页面...");
             // it's okay if we've already started discovery
         } catch (SecurityException e) {
-            setText(Arrays.toString(e.getStackTrace()));
             // On some platforms, we need the user to select the app to give us permisison to the USB device.
             Toast.makeText(this, "请插入一个Flir设备", Toast.LENGTH_LONG).show();
             // There is likely a cleaner way to recover, but for now, exit the activity and
@@ -194,7 +197,7 @@ public class InfraredActivity extends AppCompatActivity implements Device.Delega
                 @Override
                 public void run() {
                     super.run();
-                    setText("调整中");
+                    setText("校准相机中...");
                     thermalImageView.setColorFilter(Color.DKGRAY, PorterDuff.Mode.DARKEN);
                     findViewById(R.id.tuningProgressBar).setVisibility(View.VISIBLE);
                     findViewById(R.id.tuningTextView).setVisibility(View.VISIBLE);
@@ -207,7 +210,7 @@ public class InfraredActivity extends AppCompatActivity implements Device.Delega
                 @Override
                 public void run() {
                     super.run();
-                    setText("完成校准");
+                    setText("完成校准!");
                     thermalImageView.clearColorFilter();
                     findViewById(R.id.pleaseConnect).setVisibility(View.GONE);
                     findViewById(R.id.tuningProgressBar).setVisibility(View.GONE);
@@ -221,6 +224,8 @@ public class InfraredActivity extends AppCompatActivity implements Device.Delega
     public void onAutomaticTuningChanged(boolean b) {
 
     }
+
+
 
     @Override
     public void onDeviceConnected(Device device) {
@@ -455,6 +460,7 @@ public class InfraredActivity extends AppCompatActivity implements Device.Delega
             @Override
             public void run() {
                 information.setText(builder.toString());
+                scrollToBottom(scrollView,information);
             }
         });
     }
@@ -467,5 +473,23 @@ public class InfraredActivity extends AppCompatActivity implements Device.Delega
         return super.onKeyDown(keyCode, event);
     }
 
+    public static void scrollToBottom(final View scroll, final View inner) {
 
+        Handler mHandler = new Handler();
+
+        mHandler.post(new Runnable() {
+            public void run() {
+                if (scroll == null || inner == null) {
+                    return;
+                }
+
+                int offset = inner.getMeasuredHeight() - scroll.getHeight();
+                if (offset < 0) {
+                    offset = 0;
+                }
+
+                scroll.scrollTo(0, offset);
+            }
+        });
+    }
 }

@@ -1,9 +1,12 @@
 package com.example.glass.ui.view;
 
+import static com.example.glass.ui.view.InfraredActivity.scrollToBottom;
+
 import androidx.appcompat.app.AppCompatActivity;
 
 import android.os.Bundle;
 import android.view.View;
+import android.widget.ScrollView;
 import android.widget.TextView;
 
 import com.example.glass.R;
@@ -20,6 +23,7 @@ public class UltravioletSettingActivity extends AppCompatActivity {
     private GlassButton send;
     private TextView information;
     private UDPClient udpClient;
+    private ScrollView ultravioletscrollView;
     private volatile StringBuilder builder = new StringBuilder();
 
     @Override
@@ -33,7 +37,7 @@ public class UltravioletSettingActivity extends AppCompatActivity {
     private void initView(){
         send = findViewById(R.id.ultravioletSettingButton);
         information = findViewById(R.id.ultravioletInformation);
-
+        ultravioletscrollView = findViewById(R.id.ultravioletscrollView);
 
         udpClient =  new UDPClient(this,new OnMsgReturnedListener() {
             @Override
@@ -95,6 +99,7 @@ public class UltravioletSettingActivity extends AppCompatActivity {
             @Override
             public void run() {
                 information.setText(builder.toString());
+                scrollToBottom(ultravioletscrollView,information);
             }
         });
 

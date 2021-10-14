@@ -1,5 +1,7 @@
 package com.example.glass.ui.view;
 
+import static androidx.constraintlayout.motion.utils.Oscillator.TAG;
+
 import androidx.annotation.NonNull;
 import androidx.annotation.RequiresApi;
 import androidx.appcompat.app.AppCompatActivity;
@@ -32,6 +34,7 @@ import android.os.Bundle;
 import android.os.Environment;
 import android.os.Handler;
 import android.os.HandlerThread;
+import android.util.Log;
 import android.view.Surface;
 import android.view.SurfaceHolder;
 import android.view.SurfaceView;
@@ -57,6 +60,7 @@ import java.util.Arrays;
 public class CameraActivity extends AppCompatActivity implements Camera2Helper.AfterDoListener{
 
 
+    private String TAG = "CameraActivity";
     private Camera2Helper camera2Helper;
     private AutoFitTextureView textureView;
     private File file;
@@ -87,7 +91,6 @@ public class CameraActivity extends AppCompatActivity implements Camera2Helper.A
                 startActivity(intent);
             }
         });
-
 
     }
 

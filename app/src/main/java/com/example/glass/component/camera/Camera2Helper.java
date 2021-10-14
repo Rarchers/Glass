@@ -27,10 +27,12 @@ import android.os.Build;
 import android.os.Handler;
 import android.os.HandlerThread;
 
+import android.util.Log;
 import android.util.Size;
 import android.util.SparseIntArray;
 import android.view.Surface;
 import android.view.TextureView;
+import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.RequiresApi;
@@ -83,7 +85,7 @@ public class Camera2Helper {
     private static CameraManager manager;
     private AfterDoListener listener;
     private boolean isNeedHideProgressbar=true;
-
+    private String TAG = "CameraActivity";
     //从屏幕旋转转换为JPEG方向
     static {
         ORIENTATIONS.append(Surface.ROTATION_0, 90);
@@ -241,7 +243,7 @@ public class Camera2Helper {
     }
 
     public static Camera2Helper getInstance(Activity act, AutoFitTextureView view, File file) {
-        if (singleton == null) {
+        if (singleton == null || singleton.textureView == null) {
             synchronized (Camera2Helper.class) {
                 singleton = new Camera2Helper(act, view, file);
             }
@@ -255,13 +257,23 @@ public class Camera2Helper {
     public void startCameraPreView() {
         startBackgroundThread();
         //1、如果TextureView 可用则直接打开相机
+        Log.e(TAG, "startCameraPreView: 开启相机！！" );
         new Handler().postDelayed(new Runnable() {
             @Override
             public void run() {
+                Log.e(TAG, "run: texture" +textureView);
+                Log.e(TAG, "run: activity"+activity );
+                Log.e(TAG, "run: mfile"+mFile );
+
+
+
+
                 if (textureView != null) {
                     if (textureView.isAvailable()) {
+                        Log.d(TAG, "run: texture 可用");
                         openCamera(textureView.getWidth(), textureView.getHeight());
                     } else {
+                        Log.d(TAG, "run: texture 不可用");
                         textureView.setSurfaceTextureListener(mSurfaceTextureListener);//设置TextureView 的回调后，当满足之后自动回调到
                     }
                 }
@@ -587,7 +599,7 @@ public class Camera2Helper {
      * 打开指定摄像头
      */
     private void openCamera(int width, int height) {
-
+        Log.e(TAG, "openCamera: 开启中...");
         //4、设置参数
         setUpCameraOutputs(width, height);
         configureTransform(width, height);
