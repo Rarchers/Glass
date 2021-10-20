@@ -8,6 +8,7 @@ import android.net.wifi.WifiInfo;
 import android.net.wifi.WifiManager;
 import android.text.format.Formatter;
 
+import com.example.glass.component.ultraviolet.Config;
 import com.example.glass.component.ultraviolet.net.OnMsgReturnedListener;
 
 import java.io.BufferedReader;
@@ -42,7 +43,7 @@ public class ScanReachableNet extends Thread{
                 String prefix = ipString.substring(0, ipString.lastIndexOf(".") + 1);
                 listener.onStateMsg("发现以下局域网内ip");
 
-                listener.onStateMsg("当前扫描：192.168.1.195");
+                listener.onStateMsg("当前扫描："+ Config.DEVICE_IP);
                 String testIp = prefix + String.valueOf(195);
                 InetAddress address = InetAddress.getByName(testIp);
                 boolean reachable = address.isReachable(1000);
@@ -54,7 +55,7 @@ public class ScanReachableNet extends Thread{
 
                 listener.onStateMsg("开始执行ping命令确认是否ping通：");
                 Process p = Runtime.getRuntime().exec(
-                        "ping -c 5 -w 5 192.168.1.195");//
+                        "ping -c 5 -w 5 "+Config.DEVICE_IP);//
                 p.waitFor();
                 int status = p.exitValue();
                 InputStreamReader reader = new InputStreamReader(p.getInputStream());

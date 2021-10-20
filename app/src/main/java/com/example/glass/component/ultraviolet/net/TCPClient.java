@@ -4,6 +4,7 @@ import static android.content.ContentValues.TAG;
 
 import android.util.Log;
 
+import com.example.glass.component.ultraviolet.Config;
 import com.example.glass.component.ultraviolet.bean.PicInfoPacket;
 import com.example.glass.component.ultraviolet.bean.PicInfoPacketAnalysis;
 import com.example.glass.utils.Java2StructUtils;
@@ -48,7 +49,7 @@ public class TCPClient {
             super.run();
 
             try {
-                socket = new Socket("192.168.1.195", CAMERA_DATA_PORT);
+                socket = new Socket(Config.DEVICE_IP, CAMERA_DATA_PORT);
                 socket.sendUrgentData(0xFF);
                 listener.onStateMsg("tcp Socket初始化完成"+socket.isConnected());
             } catch (Exception e) {

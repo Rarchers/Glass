@@ -2,6 +2,9 @@ package com.example.glass.application;
 
 import android.app.Activity;
 import android.app.Application;
+import android.os.Bundle;
+
+import androidx.appcompat.app.AppCompatActivity;
 
 import com.rokid.glass.instruct.VoiceInstruction;
 import com.rokid.glass.instruct.entity.EntityKey;

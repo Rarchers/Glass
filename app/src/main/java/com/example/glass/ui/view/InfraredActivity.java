@@ -2,6 +2,7 @@ package com.example.glass.ui.view;
 
 import androidx.appcompat.app.AppCompatActivity;
 
+import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.Context;
 import android.content.DialogInterface;
@@ -45,6 +46,10 @@ import com.flir.flironesdk.FlirUsbDevice;
 import com.flir.flironesdk.Frame;
 import com.flir.flironesdk.FrameProcessor;
 import com.flir.flironesdk.RenderedImage;
+import com.rokid.glass.instruct.InstructLifeManager;
+import com.rokid.glass.instruct.entity.EntityKey;
+import com.rokid.glass.instruct.entity.IInstructReceiver;
+import com.rokid.glass.instruct.entity.InstructEntity;
 
 import java.io.File;
 import java.nio.ByteBuffer;
@@ -78,7 +83,7 @@ public class InfraredActivity extends AppCompatActivity implements Device.Delega
 
     private ProgressBar loading;
     private ImageView spotMeterIcon;
-
+    private InstructLifeManager mLifeManager;
     ScaleGestureDetector mScaleDetector;
 
     @Override
@@ -86,6 +91,7 @@ public class InfraredActivity extends AppCompatActivity implements Device.Delega
         super.onCreate(savedInstanceState);
         this.requestWindowFeature(Window.FEATURE_NO_TITLE);
         setContentView(R.layout.carriageaxletemperature);
+        configInstruct();
         information = findViewById(R.id.infraredInfo);
         scrollView = findViewById(R.id.scrollviewInfrared);
 
@@ -492,4 +498,58 @@ public class InfraredActivity extends AppCompatActivity implements Device.Delega
             }
         });
     }
+
+
+
+
+    public void configInstruct() {
+        mLifeManager = new InstructLifeManager(this, getLifecycle(), mInstructLifeListener);
+        mLifeManager.addInstructEntity(
+                new InstructEntity()
+                        .addEntityKey(new EntityKey("返回", null))
+                        .addEntityKey(new EntityKey(EntityKey.Language.en, "back"))
+                        .setShowTips(true)
+                        .setCallback(new IInstructReceiver() {
+                            @Override
+                            public void onInstructReceive(Activity act, String key, InstructEntity instruct) {
+                                if (act != null)
+                                   act.finish();
+                            }
+                        })
+        );
+    }
+
+    private InstructLifeManager.IInstructLifeListener mInstructLifeListener = new InstructLifeManager.IInstructLifeListener() {
+
+        /** 是否拦截处理当前语音指令，拦截后之前配置的指令闭包不会被调用
+         * （可以用来提前处理一些指令，然后返回false）
+         * @param command
+         * @return true：拦截事件 false：不进行拦截
+         */
+        @Override
+        public boolean onInterceptCommand(String command) {
+
+            if ("返回".equals(command)) {
+                return true;
+            }
+            return false;
+        }
+
+        @Override
+        public void onTipsUiReady() {
+            Log.d("AudioAi", "onTipsUiReady Call ");
+            if (mLifeManager != null) {
+                mLifeManager.setLeftBackShowing(false);
+            }
+        }
+
+        @Override
+        public void onHelpLayerShow(boolean show) {
+
+        }
+    };
+
+
+
+
 }

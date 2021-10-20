@@ -14,6 +14,7 @@ import android.widget.Toast;
 
 import com.example.glass.R;
 
+import com.example.glass.application.InstructionApplication;
 import com.rokid.glass.instruct.InstructLifeManager;
 import com.rokid.glass.instruct.entity.EntityKey;
 import com.rokid.glass.instruct.entity.IInstructReceiver;
@@ -27,7 +28,7 @@ public class MainActivity extends AppCompatActivity {
 
 
     private InstructLifeManager mLifeManager;
-    private SpeechUserManager mSpeechManager;
+
     private GlassButton ultraviolet;
     private GlassButton infrared;
     private GlassButton camera;
@@ -35,12 +36,12 @@ public class MainActivity extends AppCompatActivity {
     private String TAG ="AUDIO";
 
     @Override
-    protected void onCreate(Bundle savedInstanceState) {
+    public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         configInstruct();
         initView();
-        mSpeechManager = new SpeechUserManager(this, false);
+
 
     }
 
@@ -57,69 +58,121 @@ public class MainActivity extends AppCompatActivity {
        camera.setOnClickListener(new View.OnClickListener() {
            @Override
            public void onClick(View view) {
-               Intent intent = new Intent(MainActivity.this,CameraActivity.class);
-               startActivity(intent);
+               openCamera(MainActivity.this);
            }
        });
 
        ultraviolet.setOnClickListener(new View.OnClickListener() {
            @Override
            public void onClick(View v) {
-               Intent intent = new Intent(MainActivity.this,UltravioletActivity.class);
-               startActivity(intent);
+               openUltraviolet(MainActivity.this);
            }
        });
 
        infrared.setOnClickListener(new View.OnClickListener() {
            @Override
            public void onClick(View v) {
-               Intent intent = new Intent(MainActivity.this,InfraredActivity.class);
-               startActivity(intent);
+               openInfrared(MainActivity.this);
            }
        });
     }
 
+    private void openCamera(Activity activity){
+        Intent intent = new Intent(activity,CameraActivity.class);
+        startActivity(intent);
+    }
+
+    private void openUltraviolet(Activity activity){
+        Intent intent = new Intent(activity,UltravioletActivity.class);
+        startActivity(intent);
+    }
+    private void openInfrared(Activity activity){
+        Intent intent = new Intent(activity,InfraredActivity.class);
+        startActivity(intent);
+    }
+
+
     public void configInstruct() {
         mLifeManager = new InstructLifeManager(this, getLifecycle(), mInstructLifeListener);
-        mLifeManager.getInstructConfig().setIgnoreSystem(true);
         mLifeManager.addInstructEntity(
                 new InstructEntity()
-                        .addEntityKey(new EntityKey("在线测试", "zai xian ce shi"))
-                        .addEntityKey(new EntityKey(EntityKey.Language.en, "online test"))
+                        .addEntityKey(new EntityKey("普通相机模块", null))
+                        .addEntityKey(new EntityKey(EntityKey.Language.en, "camera"))
                         .setShowTips(true)
                         .setCallback(new IInstructReceiver() {
                             @Override
                             public void onInstructReceive(Activity act, String key, InstructEntity instruct) {
-                                if (mSpeechManager != null) {
-                                    mSpeechManager.doSpeechAsr(mAsrCallBack);
-                                }
+                                if (act != null)
+                                openCamera(act);
                             }
                         })
-        ).addInstructEntity(
-                new InstructEntity()
-                        .addEntityKey(new EntityKey("声音测试", "sheng yin ce shi"))
-                        .addEntityKey(new EntityKey(EntityKey.Language.en, "tts test"))
-                        .setShowTips(true)
-                        .setCallback(new IInstructReceiver() {
-                            @Override
-                            public void onInstructReceive(Activity act, String key, InstructEntity instruct) {
-                                if (mSpeechManager != null) {
-                                    mSpeechManager.doSpeechTts("乌龙茶饮料很好喝", mTtsCallBack);
-                                }
-                            }
-                        })
-        );
+        )
+                .addInstructEntity(
+                        new InstructEntity()
+                                .addEntityKey(new EntityKey("红外模块", null))
+                                .addEntityKey(new EntityKey(EntityKey.Language.en, "infrared"))
+                                .setShowTips(true)
+                                .setCallback(new IInstructReceiver() {
+                                    @Override
+                                    public void onInstructReceive(Activity act, String key, InstructEntity instruct) {
+                                        if (act != null)
+                                        openInfrared(act);
+                                    }
+                                })
+                )
+                .addInstructEntity(
+                        new InstructEntity()
+                                .addEntityKey(new EntityKey("离开", null))
+                                .addEntityKey(new EntityKey(EntityKey.Language.en, "leave"))
+                                .setShowTips(true)
+                                .setCallback(new IInstructReceiver() {
+                                    @Override
+                                    public void onInstructReceive(Activity act, String key, InstructEntity instruct) {
+                                        if (act != null)
+                                           act.finish();
+                                    }
+                                })
+                )
+                .addInstructEntity(
+                        new InstructEntity()
+                                .addEntityKey(new EntityKey("紫外模块", null))
+                                .addEntityKey(new EntityKey(EntityKey.Language.en, "ultraviolet"))
+                                .setShowTips(true)
+                                .setCallback(new IInstructReceiver() {
+                                    @Override
+                                    public void onInstructReceive(Activity act, String key, InstructEntity instruct) {
+                                        if (act != null) {
+                                         openUltraviolet(act);
+                                        }
+                                    }
+                                })
+
+                );
     }
 
     private InstructLifeManager.IInstructLifeListener mInstructLifeListener = new InstructLifeManager.IInstructLifeListener() {
+
+        /** 是否拦截处理当前语音指令，拦截后之前配置的指令闭包不会被调用
+         * （可以用来提前处理一些指令，然后返回false）
+         * @param command
+         * @return true：拦截事件 false：不进行拦截
+         */
         @Override
         public boolean onInterceptCommand(String command) {
+            Log.d(TAG, "doReceiveCommand command = " + command);
+
+            if ("返回".equals(command)) {
+                return true;
+            }
             return false;
         }
 
         @Override
         public void onTipsUiReady() {
             Log.d("AudioAi", "onTipsUiReady Call ");
+            if (mLifeManager != null) {
+                mLifeManager.setLeftBackShowing(false);
+            }
         }
 
         @Override
@@ -127,74 +180,5 @@ public class MainActivity extends AppCompatActivity {
 
         }
     };
-
-    private AsrCallBack mAsrCallBack = new AsrCallBack() {
-        @Override
-        public void onStart(int id) throws RemoteException {
-            Log.d(TAG, "AsrCallBack onStart id = " + id);
-        }
-
-        @Override
-        public void onIntermediateResult(int id, String asr, String extra) throws RemoteException {
-            Log.d(TAG, "AsrCallBack onIntermediateResult id = " + id+ ", asr = " + asr + ", extra = " + extra);
-        }
-
-        @Override
-        public void onAsrComplete(int id, String asr) throws RemoteException {
-            Log.d(TAG, "AsrCallBack onAsrComplete id = " + id + ", asr = " + asr);
-        }
-
-        @Override
-        public void onComplete(int id, String nlp, String action) throws RemoteException {
-            Log.d(TAG, "AsrCallBack onComplete id = " + id + ", nlp = " + nlp + ", action = " + action);
-        }
-
-        @Override
-        public void onCancel(int id) throws RemoteException {
-            Log.d(TAG, "AsrCallBack onCancel id = " + id);
-        }
-
-        @Override
-        public void onError(int id, int err) throws RemoteException {
-            Log.d(TAG, "AsrCallBack onError id = " + id);
-        }
-    };
-
-    private TtsCallBack mTtsCallBack = new TtsCallBack() {
-        @Override
-        public void onStart(int id) throws RemoteException {
-            Log.d(TAG, "TtsCallBack onStart id = " + id);
-        }
-
-        @Override
-        public void onVoicePlay(int id, String text) throws RemoteException {
-            Log.d(TAG, "TtsCallBack onVoicePlay id = " + id);
-        }
-
-        @Override
-        public void onCancel(int id) throws RemoteException {
-            Log.d(TAG, "TtsCallBack onCancel id = " + id);
-        }
-
-        @Override
-        public void onComplete(int id) throws RemoteException {
-            Log.d(TAG, "TtsCallBack onComplete id = " + id);
-        }
-
-        @Override
-        public void onError(int id, int err) throws RemoteException {
-            Log.d(TAG, "TtsCallBack onError id = " + id);
-        }
-    };
-
-    @Override
-    protected void onDestroy() {
-        if (mSpeechManager != null) {
-            mSpeechManager.onDestroy();
-            mSpeechManager = null;
-        }
-
-        super.onDestroy();
-    }
 
 }

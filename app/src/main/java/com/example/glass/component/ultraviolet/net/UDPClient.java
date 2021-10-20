@@ -8,6 +8,7 @@ import android.net.DhcpInfo;
 import android.net.wifi.WifiManager;
 import android.util.Log;
 
+import com.example.glass.component.ultraviolet.Config;
 import com.example.glass.utils.IpAddress;
 import com.example.glass.utils.ScanReachableNet;
 
@@ -21,7 +22,7 @@ public class UDPClient {
     public final static int CAMERA_PARAM_PORT = 60002;
     public final static int ANDROID_PARAM_PORT = 60082;
     private InetAddress mServerAddress; //服务端的IP
-    private String BROADCAST_IP = "192.168.1.195";
+    private String BROADCAST_IP = Config.DEVICE_IP;
     private InetAddress inetAddress = null;
     private DatagramSocket sendSocket = null;
     private DatagramSocket receiveSocket = null;
