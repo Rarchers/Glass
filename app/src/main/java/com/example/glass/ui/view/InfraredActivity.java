@@ -506,14 +506,17 @@ public class InfraredActivity extends AppCompatActivity implements Device.Delega
         mLifeManager = new InstructLifeManager(this, getLifecycle(), mInstructLifeListener);
         mLifeManager.addInstructEntity(
                 new InstructEntity()
-                        .addEntityKey(new EntityKey("返回", null))
+                        .addEntityKey(new EntityKey("上一步", null))
                         .addEntityKey(new EntityKey(EntityKey.Language.en, "back"))
                         .setShowTips(true)
                         .setCallback(new IInstructReceiver() {
                             @Override
                             public void onInstructReceive(Activity act, String key, InstructEntity instruct) {
-                                if (act != null)
-                                   act.finish();
+                                if (act != null){
+                                    Toast.makeText(act, "leave", Toast.LENGTH_SHORT).show();
+                                    moveTaskToBack(true);
+                                }
+
                             }
                         })
         );
@@ -528,10 +531,6 @@ public class InfraredActivity extends AppCompatActivity implements Device.Delega
          */
         @Override
         public boolean onInterceptCommand(String command) {
-
-            if ("返回".equals(command)) {
-                return true;
-            }
             return false;
         }
 

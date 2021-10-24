@@ -1,14 +1,12 @@
 package com.example.glass.component.ultraviolet.net;
 
-import static android.content.ContentValues.TAG;
 import static android.content.Context.WIFI_SERVICE;
 
 import android.content.Context;
 import android.net.DhcpInfo;
 import android.net.wifi.WifiManager;
-import android.util.Log;
 
-import com.example.glass.component.ultraviolet.Config;
+import com.example.glass.component.Config;
 import com.example.glass.utils.IpAddress;
 import com.example.glass.utils.ScanReachableNet;
 

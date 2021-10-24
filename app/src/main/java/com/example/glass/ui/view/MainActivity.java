@@ -32,6 +32,7 @@ public class MainActivity extends AppCompatActivity {
     private GlassButton ultraviolet;
     private GlassButton infrared;
     private GlassButton camera;
+    private GlassButton video;
     private StringBuilder builder = new StringBuilder();
     private String TAG ="AUDIO";
 
@@ -50,8 +51,9 @@ public class MainActivity extends AppCompatActivity {
        ultraviolet = findViewById(R.id.ultravioletButton);
        infrared = findViewById(R.id.infraredButton);
        camera = findViewById(R.id.cameraButton);
-
+       video = findViewById(R.id.videoButton);
        camera.setClickable(true);
+       video.setClickable(true);
        ultraviolet.setClickable(true);
        infrared.setClickable(true);
 
@@ -59,6 +61,13 @@ public class MainActivity extends AppCompatActivity {
            @Override
            public void onClick(View view) {
                openCamera(MainActivity.this);
+           }
+       });
+
+       video.setOnClickListener(new View.OnClickListener() {
+           @Override
+           public void onClick(View view) {
+               openVideo(MainActivity.this);
            }
        });
 
@@ -91,6 +100,11 @@ public class MainActivity extends AppCompatActivity {
         startActivity(intent);
     }
 
+    private void openVideo(Activity activity){
+        Intent intent = new Intent(activity,VedioActivity.class);
+        startActivity(intent);
+    }
+
 
     public void configInstruct() {
         mLifeManager = new InstructLifeManager(this, getLifecycle(), mInstructLifeListener);
@@ -117,6 +131,19 @@ public class MainActivity extends AppCompatActivity {
                                     public void onInstructReceive(Activity act, String key, InstructEntity instruct) {
                                         if (act != null)
                                         openInfrared(act);
+                                    }
+                                })
+                )
+                .addInstructEntity(
+                        new InstructEntity()
+                                .addEntityKey(new EntityKey("视频通话模块", null))
+                                .addEntityKey(new EntityKey(EntityKey.Language.en, "video"))
+                                .setShowTips(true)
+                                .setCallback(new IInstructReceiver() {
+                                    @Override
+                                    public void onInstructReceive(Activity act, String key, InstructEntity instruct) {
+                                        if (act != null)
+                                            openVideo(act);
                                     }
                                 })
                 )

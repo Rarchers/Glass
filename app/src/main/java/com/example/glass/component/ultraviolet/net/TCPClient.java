@@ -4,15 +4,12 @@ import static android.content.ContentValues.TAG;
 
 import android.util.Log;
 
-import com.example.glass.component.ultraviolet.Config;
+import com.example.glass.component.Config;
 import com.example.glass.component.ultraviolet.bean.PicInfoPacket;
 import com.example.glass.component.ultraviolet.bean.PicInfoPacketAnalysis;
 import com.example.glass.utils.Java2StructUtils;
 
-import java.io.BufferedReader;
-import java.io.IOException;
 import java.io.InputStream;
-import java.io.InputStreamReader;
 import java.net.Socket;
 import java.util.Arrays;
 

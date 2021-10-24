@@ -176,6 +176,18 @@ public class CameraActivity extends AppCompatActivity implements Camera2Helper.A
                                     startInfrared(act);
                             }
                         })
+        ).addInstructEntity(
+                new InstructEntity()
+                        .addEntityKey(new EntityKey("上一步", null))
+                        .addEntityKey(new EntityKey(EntityKey.Language.en, "back"))
+                        .setShowTips(true)
+                        .setCallback(new IInstructReceiver() {
+                            @Override
+                            public void onInstructReceive(Activity act, String key, InstructEntity instruct) {
+                                if (act != null)
+                                    act.finish();
+                            }
+                        })
         );
     }
 

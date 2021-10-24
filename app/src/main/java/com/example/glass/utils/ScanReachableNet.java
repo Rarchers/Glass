@@ -8,7 +8,7 @@ import android.net.wifi.WifiInfo;
 import android.net.wifi.WifiManager;
 import android.text.format.Formatter;
 
-import com.example.glass.component.ultraviolet.Config;
+import com.example.glass.component.Config;
 import com.example.glass.component.ultraviolet.net.OnMsgReturnedListener;
 
 import java.io.BufferedReader;
