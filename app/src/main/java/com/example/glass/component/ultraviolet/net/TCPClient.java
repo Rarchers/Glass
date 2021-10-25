@@ -70,8 +70,6 @@ public class TCPClient {
                     Log.e(TAG, "run: "+packet.toString() );
                     listener.onStateMsg(""+Integer.toHexString(Java2StructUtils.byteArrayToInt32(packet.getFlag1())));
                     listener.onStateMsg(""+Integer.toHexString(Java2StructUtils.byteArrayToInt16(packet.getnImageInfo())));
-
-
                     shutdown = true;
                 }
             } catch (Exception e) {

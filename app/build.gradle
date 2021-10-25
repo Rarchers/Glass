@@ -8,17 +8,22 @@ android {
     defaultConfig {
         applicationId "com.example.glass"
         minSdk 21
-        targetSdk 22
+        targetSdk 23
         versionCode 1
         versionName "1.0"
         ndk {
             abiFilters  "armeabi-v7a"
         }
         externalNativeBuild {
-            cmake {
+            ndkBuild {
                 cppFlags ''
             }
         }
+        ndk {
+            moduleName "ffmpeg"
+        }
+
+
     }
 
     buildTypes {
@@ -31,9 +36,15 @@ android {
 
     sourceSets {
         main {
+            jni.srcDirs = []
             jniLibs.srcDirs = ['libs']
         }
     }
+//    externalNativeBuild {
+//        ndkBuild {
+//            path file('src/main/jni/Android.mk')
+//        }
+//    }
 
 
 }

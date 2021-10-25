@@ -9,12 +9,15 @@ import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.example.glass.R;
 import com.example.glass.application.InstructionApplication;
+import com.example.glass.component.ultraviolet.bean.PicInfoPacket;
 import com.example.glass.component.ultraviolet.net.OnMsgReturnedListener;
 import com.example.glass.component.ultraviolet.net.TCPClient;
 import com.example.glass.component.ultraviolet.net.UDPClient;
+import com.example.glass.utils.Java2StructUtils;
 import com.rokid.glass.instruct.InstructLifeManager;
 import com.rokid.glass.instruct.entity.EntityKey;
 import com.rokid.glass.instruct.entity.IInstructReceiver;
@@ -94,8 +97,16 @@ public class UltravioletActivity extends AppCompatActivity {
             tcpClient = new TCPClient(new OnMsgReturnedListener() {
                 @Override
                 public void onMsgReturned(Object msg) {
+                    try{
+                        PicInfoPacket packet = (PicInfoPacket) msg;
+                        if (Java2StructUtils.byteArrayToInt32(packet.getaSize())>0){
+                            Toast.makeText(UltravioletActivity.this, "存在燃弧！！", Toast.LENGTH_SHORT).show();
+                        }
 
-                    setText((String)msg,0);
+                    }catch (Exception e){
+                        e.printStackTrace();
+                    }
+
                 }
 
                 @Override
