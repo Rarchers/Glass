@@ -101,7 +101,7 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void openVideo(Activity activity){
-        Intent intent = new Intent(activity,VedioActivity.class);
+        Intent intent = new Intent(activity,UltravioletSettingActivity.class);
         startActivity(intent);
     }
 

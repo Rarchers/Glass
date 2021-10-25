@@ -68,6 +68,13 @@ public class RtpSocket {
 	}
 
 	/** Receives a RTP packet from this socket */
+	public void receive(DatagramPacket rtpp) throws IOException {
+		socket.receive(rtpp);
+		if (!socket.isConnected())
+			socket.connect(datagram.getAddress(),datagram.getPort());
+	}
+
+	/** Receives a RTP packet from this socket */
 	public void receive(RtpPacket rtpp) throws IOException {
 		datagram.setData(rtpp.packet);
 		datagram.setLength(rtpp.packet.length);
@@ -76,8 +83,6 @@ public class RtpSocket {
 			socket.connect(datagram.getAddress(),datagram.getPort());
 		rtpp.packet_len = datagram.getLength();
 	}
-
-
 
 	/** Sends a RTP packet from this socket */
 	public void send(RtpPacket rtpp) throws IOException {
@@ -112,4 +117,5 @@ public class RtpSocket {
 		datagram.setSocketAddress(r_addr);
 		socket.send(datagram);
 	}
+
 }
