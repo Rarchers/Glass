@@ -41,34 +41,36 @@ import com.example.glass.R;
 import com.example.glass.utils.GlobalConfig;
 import com.example.glass.utils.ThresholdHelp;
 import com.example.glass.utils.imagehelp.ImageHelp;
-import com.flir.flironesdk.Device;
-import com.flir.flironesdk.FlirUsbDevice;
-import com.flir.flironesdk.Frame;
-import com.flir.flironesdk.FrameProcessor;
-import com.flir.flironesdk.RenderedImage;
+
+import com.flir.thermalsdk.ErrorCode;
+import com.flir.thermalsdk.androidsdk.ThermalSdkAndroid;
+import com.flir.thermalsdk.androidsdk.image.BitmapAndroid;
+import com.flir.thermalsdk.image.JavaImageBuffer;
+import com.flir.thermalsdk.image.palettes.Palette;
+import com.flir.thermalsdk.image.palettes.PaletteManager;
+import com.flir.thermalsdk.live.Camera;
+import com.flir.thermalsdk.live.CommunicationInterface;
+import com.flir.thermalsdk.live.Identity;
+import com.flir.thermalsdk.live.connectivity.ConnectionStatusListener;
+import com.flir.thermalsdk.live.discovery.DiscoveryEventListener;
+import com.flir.thermalsdk.live.discovery.DiscoveryFactory;
+import com.flir.thermalsdk.live.remote.Battery;
+import com.flir.thermalsdk.live.remote.RemoteControl;
+import com.flir.thermalsdk.live.streaming.ThermalImageStreamListener;
 import com.rokid.glass.instruct.InstructLifeManager;
 import com.rokid.glass.instruct.entity.EntityKey;
 import com.rokid.glass.instruct.entity.IInstructReceiver;
 import com.rokid.glass.instruct.entity.InstructEntity;
 
-import java.io.File;
-import java.nio.ByteBuffer;
-import java.text.NumberFormat;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.EnumSet;
-import java.util.Timer;
-import java.util.TimerTask;
 
-public class InfraredActivity extends AppCompatActivity implements Device.Delegate, FrameProcessor.Delegate, Device.StreamDelegate, Device.PowerUpdateDelegate{
+public class InfraredActivity extends AppCompatActivity{
 
     private ImageView thermalImageView;
-    private volatile Device flirOneDevice;
-    private FrameProcessor frameProcessor;
-    private TextView aver,max,min,battery; //最高-平均
+
+    private TextView aver,max,min,batterytv; //最高-平均
     private SoundPool sp;
     private int sound;
-    private ImageHelp imageHelp;
+
     private int maxX, maxY;
     private TextView information;
     private StringBuilder builder = new StringBuilder();
@@ -76,330 +78,163 @@ public class InfraredActivity extends AppCompatActivity implements Device.Delega
     private int height;
     private short[] thermalPixels;
     private ScrollView scrollView;
-    private Device.TuningState currentTuningState = Device.TuningState.Unknown;
     private double maxTemp, meantTemp,minTemp;//最高-平均温度
-
-    private GlobalConfig config;
-
-    private ProgressBar loading;
-    private ImageView spotMeterIcon;
+    Camera cameraInstance;
     private InstructLifeManager mLifeManager;
-    ScaleGestureDetector mScaleDetector;
-
+    RemoteControl remoteControl;
+    Palette palette;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         this.requestWindowFeature(Window.FEATURE_NO_TITLE);
         setContentView(R.layout.carriageaxletemperature);
-        configInstruct();
         information = findViewById(R.id.infraredInfo);
+        thermalImageView = (ImageView) findViewById(R.id.imageView);
         scrollView = findViewById(R.id.scrollviewInfrared);
-
-       // Intent serviceIntent = new Intent(InfraredActivity.this, UpLoadService.class);
-        //startService(serviceIntent);
-        config = new GlobalConfig();
-        config.readConfig();
-
-        spotMeterIcon = (ImageView) findViewById(R.id.spotMeterIcon);
-        loading = (ProgressBar) findViewById(R.id.loading);
-
-        //最高-低
         aver = (TextView) findViewById(R.id.aver);
         max = (TextView) findViewById(R.id.max);
         min = (TextView) findViewById(R.id.min);
+        batterytv = findViewById(R.id.battery);
 
 
 
+        configInstruct();
+        //Intent serviceIntent = new Intent(InfraredActivity.this, UpLoadService.class);
+        //startService(serviceIntent);
+
+        //最高-低
         max.setText("最高");
         min.setText("最低");
         aver.setText("平均");
 
-        try {
-            Device.startDiscovery(this, this);
-        } catch (IllegalStateException e) {
-            setText("开始搜寻相机，请确保相机已开机并连接");
-            setText("若长时间无画面请检查相机后重新进入此页面...");
-            // it's okay if we've already started discovery
-        } catch (SecurityException e) {
-            setText(Arrays.toString(e.getStackTrace()));
-            // On some platforms, we need the user to select the app to give us permisison to the USB device.
-            Toast.makeText(this, "请插入一个Flir设备", Toast.LENGTH_LONG).show();
-            // There is likely a cleaner way to recover, but for now, exit the activity and
-            // wait for user to follow the instructions;
-            finish();
-        }
-
-
-
-
-
         sp = new SoundPool(10, AudioManager.STREAM_SYSTEM, 5);//第一个参数为同时播放数据流的最大个数，第二数据流类型，第三为声音质量
         sound = sp.load(this, R.raw.sound, 0);
-
-
-
-
-
-
-        RenderedImage.ImageType defaultImageType = RenderedImage.ImageType.BlendedMSXRGBA8888Image;
-        frameProcessor = new FrameProcessor(this, this, EnumSet.of(defaultImageType, RenderedImage.ImageType.ThermalRadiometricKelvinImage));
-
-        mScaleDetector = new ScaleGestureDetector(this, new ScaleGestureDetector.OnScaleGestureListener() {
-            @Override
-            public void onScaleEnd(ScaleGestureDetector detector) {
-            }
-
-            @Override
-            public boolean onScaleBegin(ScaleGestureDetector detector) {
-                return true;
-            }
-
-            @Override
-            public boolean onScale(ScaleGestureDetector detector) {
-                frameProcessor.setMSXDistance(detector.getScaleFactor());
-                return false;
-            }
-        });
-
-
-        imageHelp = new ImageHelp(GlobalConfig.IMAGE_PATH);
-
-        imageHelp.checkAllImagesDate();
-
-
     }
-
 
     @Override
     protected void onStart() {
         super.onStart();
-        thermalImageView = (ImageView) findViewById(R.id.imageView);
-        //若未连接设备，则显示"请连接设备"
-//        if (Device.getSupportedDeviceClasses(this).contains(FlirUsbDevice.class)) {
-//            setText("未连接设备");
-//            findViewById(R.id.pleaseConnect).setVisibility(View.VISIBLE);
-//        }
-        try {
-            Device.startDiscovery(this, this);
-        } catch (IllegalStateException e) {
-            setText("开始搜寻相机，请确保相机已开机并连接");
-            setText("若长时间无画面请检查相机后重新进入此页面...");
-            // it's okay if we've already started discovery
-        } catch (SecurityException e) {
-            // On some platforms, we need the user to select the app to give us permisison to the USB device.
-            Toast.makeText(this, "请插入一个Flir设备", Toast.LENGTH_LONG).show();
-            // There is likely a cleaner way to recover, but for now, exit the activity and
-            // wait for user to follow the instructions;
-            finish();
-        }
+        initCamera();
     }
 
-    @Override
-    public void onTuningStateChanged(Device.TuningState tuningState) {
-        setText("当前相机状态："+tuningState);
-        currentTuningState = tuningState;
-        if (tuningState == Device.TuningState.InProgress) {
-            runOnUiThread(new Thread() {
-                @Override
-                public void run() {
-                    super.run();
-                    setText("校准相机中...");
-                    thermalImageView.setColorFilter(Color.DKGRAY, PorterDuff.Mode.DARKEN);
-                    findViewById(R.id.tuningProgressBar).setVisibility(View.VISIBLE);
-                    findViewById(R.id.tuningTextView).setVisibility(View.VISIBLE);
-                    loading.setVisibility(View.GONE);
-                    spotMeterIcon.setVisibility(View.VISIBLE);
-                }
-            });
-        } else {
-            runOnUiThread(new Thread() {
-                @Override
-                public void run() {
-                    super.run();
-                    setText("完成校准!");
-                    thermalImageView.clearColorFilter();
-                    findViewById(R.id.pleaseConnect).setVisibility(View.GONE);
-                    findViewById(R.id.tuningProgressBar).setVisibility(View.GONE);
-                    findViewById(R.id.tuningTextView).setVisibility(View.GONE);
-                }
-            });
-        }
-    }
-
-    @Override
-    public void onAutomaticTuningChanged(boolean b) {
-
-    }
-
-
-
-    @Override
-    public void onDeviceConnected(Device device) {
-        runOnUiThread(new Runnable() {
-            @Override
-            public void run() {
-                findViewById(R.id.pleaseConnect).setVisibility(View.GONE);
+    private void initCamera(){
+        ThermalSdkAndroid.init(this);
+        cameraInstance = new Camera();
+        remoteControl = cameraInstance.getRemoteControl();
+        palette = PaletteManager.getDefaultPalettes().get(0);
+        if(remoteControl != null) { // check if device supports RemoteControl
+            Battery battery = remoteControl.getBattery();
+            if(battery != null) { // check if device supports Battery
+                // read out battery status and percentage once
+//                Battery.ChargingState state = battery.chargingState().getSync();
+   //             int percentageLeft = battery.percentage().getSync();
+                // subscribe for updates related with battery state and percentage left
+                // assuming Battery.BatteryStateListener instance is stateListener
+                // assuming Battery.BatteryPercentageListener instance is
+  //              setBatterytv(percentageLeft);
             }
-        });
-        setText("连接红外相机成功");
-
-        flirOneDevice = device;
-        flirOneDevice.setPowerUpdateDelegate(this);
-        flirOneDevice.startFrameStream(this);
-    }
-
-    @Override
-    public void onDeviceDisconnected(Device device) {
-        runOnUiThread(new Runnable() {
-            @Override
-            public void run() {
-                findViewById(R.id.pleaseConnect).setVisibility(View.GONE);
-                thermalImageView.setImageBitmap(Bitmap.createBitmap(1, 1, Bitmap.Config.ALPHA_8));
-                thermalImageView.clearColorFilter();
-                findViewById(R.id.tuningProgressBar).setVisibility(View.GONE);
-                findViewById(R.id.tuningTextView).setVisibility(View.GONE);
-
-            }
-        });
-        setText("丢失与红外相机的连接");
-        flirOneDevice = null;
-    }
-
-
-
-    @Override
-    public void onFrameReceived(Frame frame) {
-        if (currentTuningState != Device.TuningState.InProgress) {
-            frameProcessor.processFrame(frame);
         }
+        DiscoveryFactory.getInstance().scan(aDiscoveryEventListener, CommunicationInterface.USB);
+        setText("开始搜寻相机，请确保相机已开机并连接");
+        setText("若长时间无画面请检查相机后重新进入此页面...");
+
     }
-    private Bitmap thermalBitmap = null;
-    @Override
-    public void onFrameProcessed(RenderedImage renderedImage) {
 
-        if (renderedImage.imageType() == RenderedImage.ImageType.ThermalRadiometricKelvinImage) {
-            // Note: this code is not optimized
 
-            thermalPixels = renderedImage.thermalPixelData();
+    ConnectionStatusListener listener = new ConnectionStatusListener() {
+        @Override
+        public void onDisconnected(ErrorCode errorCode) {
+            setText("丢失连接,错误： "+errorCode.toString());
+        }
 
-            width = renderedImage.width();
-            height = renderedImage.height();
-            int centerPixelIndex = width * (height / 2) + (width / 2);
-            int[] centerPixelIndexes = new int[]{
-                    centerPixelIndex, centerPixelIndex - 1, centerPixelIndex + 1,
-                    centerPixelIndex - width,
-                    centerPixelIndex - width - 1,
-                    centerPixelIndex - width + 1,
-                    centerPixelIndex + width,
-                    centerPixelIndex + width - 1,
-                    centerPixelIndex + width + 1
-            };
 
+    };
+
+    DiscoveryEventListener aDiscoveryEventListener = new DiscoveryEventListener() {
+        @Override
+        public void onCameraFound(Identity identity) {
+            // identity describes a device and is used to connect to device
             new Thread(new Runnable() {
-                short[] thermalPixels = renderedImage.thermalPixelData();
-                int width = renderedImage.width();
-                int height = renderedImage.height();
-
-
                 @Override
                 public void run() {
-                    double pixelCMax = 0,pixelCMin = 100;
-                    double pixelCAll = 0;
-                    int maxIndex = 0;
-                    int pixelTemp;
-                    double[] temp = new double[width * height];
-                    for (int i = 0; i < width * height; i++) {
-                        pixelTemp = thermalPixels[i] & 0xffff;
-                        temp[i] = (pixelTemp / 100) - 273.15;
-                        pixelCMax = pixelCMax < temp[i] ? temp[i] : pixelCMax;
-                        pixelCMin = pixelCMin > temp[i] ? temp[i] : pixelCMin;
-                        if (pixelCMax == temp[i]) {
-                            maxIndex = i;
-                        }
-                        pixelCAll += temp[i];
-                        meantTemp = pixelCAll / (width * height); //全屏平均温度
+                    try {
+                        setText("搜寻到了相机,开始连接");
+                      //  cameraInstance.connect(identity, listener, new ConnectParameters(2000));
+                        cameraInstance.connect(identity,listener);
+                        cameraInstance.subscribeStream(streamingCallbackImpl);
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                        setText("连接出错啦！"+e.getMessage());
+                        setText("准备重新尝试连接...");
+                        cameraInstance.disconnect();
+                        onCameraFound(identity);
                     }
-                    maxTemp = pixelCMax; //全屏最高温度
-                    minTemp = pixelCMin;
-                    maxX = maxIndex % width; //最高温度x坐标
-                    maxY = maxIndex / width; //最高温度y坐标
-
-
-
-
-//                    mp = MediaPlayer.create(InfraredActivity.this, R.raw.warn);
-//                    mp_strong = MediaPlayer.create(InfraredActivity.this, R.raw.warn_strong);
-//                    if (warnButton.isChecked() == true) {
-//                        if (pixelCMax > thresholdHelp.getThreshold_low() && pixelCMax < thresholdHelp.getThreshold_high()) {
-//                            mp.start();
-//                        } else if (pixelCMax > thresholdHelp.getThreshold_high()) {
-//                            mp.stop();
-//                            mp_strong.start();
-//                        }
-//                    }
                 }
             }).start();
-            //////
-
-            double averageTemp = 0;
-
-            for (int i = 0; i < centerPixelIndexes.length; i++) {  //centerPixelIndexes.length = 9
-                // Remember: all primitives are signed, we want the unsigned value,
-                // we could also use renderedImage.thermalPixelValues() instead
-                int pixelValue = (thermalPixels[centerPixelIndexes[i]]) & 0xffff;
-                averageTemp += (((double) pixelValue) - averageTemp) / ((double) i + 1);
-            }
-            //Log.i("centerPixelIndex", centerPixelIndexes.length + "");
-            double averageC = (averageTemp / 100) - 273.15;
-
-            Message msg = new Message();
-            msg.what = (int) meantTemp;
-            msg.arg1 = (int) maxTemp;
-            msg.arg2 = (int) minTemp;
-            handleTemp.sendMessage(msg);
-
-            NumberFormat numberFormat = NumberFormat.getInstance();
-            numberFormat.setMaximumFractionDigits(2);
-            numberFormat.setMinimumFractionDigits(2);
-            final String spotMeterValue = numberFormat.format(averageC) + "ºC";
-
-            runOnUiThread(new Runnable() {
-                @Override
-                public void run() {
-                    ((TextView) findViewById(R.id.spotMeterValue)).setText(spotMeterValue);
-                }
-            });
-
-            // if radiometric is the only type, also show the image
-            if (frameProcessor.getImageTypes().size() == 1) {
-                // example of a custom colorization, maps temperatures 0-100C to 8-bit gray-scale
-                byte[] argbPixels = new byte[width * height * 4];
-                final byte aPixValue = (byte) 255;
-                for (int p = 0; p < thermalPixels.length; p++) {
-                    int destP = p * 4;
-                    byte pixValue = (byte) (Math.min(0xff, Math.max(0x00, ((int) thermalPixels[p] - 27315) * (255.0 / 10000.0))));
-
-                    argbPixels[destP + 3] = aPixValue;
-                    // red pixel
-                    argbPixels[destP] = argbPixels[destP + 1] = argbPixels[destP + 2] = pixValue;
-                }
-                thermalBitmap = Bitmap.createBitmap(width, renderedImage.height(), Bitmap.Config.ARGB_8888);
-
-                thermalBitmap.copyPixelsFromBuffer(ByteBuffer.wrap(argbPixels));
-
-                updateThermalImageView(thermalBitmap);
-            }
-        } else {
-            thermalBitmap = renderedImage.getBitmap();
-            updateThermalImageView(thermalBitmap);
         }
 
+        @Override
+        public void onDiscoveryError(CommunicationInterface communicationInterface, ErrorCode errorCode) {
+            setText("搜寻出错，错误代码："+errorCode);
+        }
+
+        @Override
+        public void onCameraLost(Identity identity) {
+            setText("相机丢失");
+        }
+
+        @Override
+        public void onDiscoveryFinished(CommunicationInterface communicationInterface) {
+            setText("搜寻完成");
+        }
+    };
+
+    ThermalImageStreamListener streamingCallbackImpl
+            = new ThermalImageStreamListener() {
+        @Override
+        public void onImageReceived() {
+            cameraInstance.withImage((thermalImage) -> {
+                thermalImage.setPalette(palette);
+                JavaImageBuffer javaBuffer = thermalImage.getImage();
+                android.graphics.Bitmap bmp = BitmapAndroid.createBitmap(javaBuffer).getBitMap();
+                // refresh UI with the new android.graphics.Bitmap
+                updateThermalImageView(bmp);
+       //         double low = thermalImage.getScale().getRangeMin().value;
+        //        double height = thermalImage.getScale().getRangeMax().value;
+           //     setTemp(0,(int)low,(int)height);
+            });
+        }
+    };
 
 
+//    @Override
+//    protected void onStart() {
+//        super.onStart();
+//
+//        //若未连接设备，则显示"请连接设备"
+////        if (Device.getSupportedDeviceClasses(this).contains(FlirUsbDevice.class)) {
+////            setText("未连接设备");
+////            findViewById(R.id.pleaseConnect).setVisibility(View.VISIBLE);
+////        }
+//        try {
+//            DiscoveryFactory.getInstance().scan(aDiscoveryEventListener,
+//                    CommunicationInterface.USB);
+//        } catch (IllegalStateException e) {
+//            setText("开始搜寻相机，请确保相机已开机并连接");
+//            setText("若长时间无画面请检查相机后重新进入此页面...");
+//            // it's okay if we've already started discovery
+//        } catch (SecurityException e) {
+//            // On some platforms, we need the user to select the app to give us permisison to the USB device.
+//            Toast.makeText(this, "请插入一个Flir设备", Toast.LENGTH_LONG).show();
+//            // There is likely a cleaner way to recover, but for now, exit the activity and
+//            // wait for user to follow the instructions;
+//            finish();
+//        }
+//    }
 
-    }
 
     private void updateThermalImageView(final Bitmap frame) {
+
         runOnUiThread(new Runnable() {
             @Override
             public void run() {
@@ -407,37 +242,29 @@ public class InfraredActivity extends AppCompatActivity implements Device.Delega
             }
         });
     }
-    private Handler handleTemp = new Handler(){
-        public void handleMessage(Message msg) {
-            setTemp(msg.what,msg.arg1,msg.arg2);
-            super.handleMessage(msg);
-        }
-    };
     //显示最高-平均温度
     public void setTemp(int averT,int maxT,int minT){
-        aver.setText("平均:"+ averT+"℃    ");
-        max.setText("最高:" + maxT +"℃    ");
-        min.setText("最低:" + minT +"℃    ");
-    }
-
-    @Override
-    public void onBatteryChargingStateReceived(Device.BatteryChargingState batteryChargingState) {
-        Log.i("ExampleApp", "Battery charging state received!");
-
-    }
-
-    @Override
-    public void onBatteryPercentageReceived(byte percentage) {
-        Log.i("ExampleApp", "Battery percentage received!");
-
-        final TextView levelTextView = (TextView)findViewById(R.id.battery);
         runOnUiThread(new Runnable() {
             @Override
             public void run() {
-                levelTextView.setText(String.valueOf((int) percentage) + "%");
+                aver.setText("平均:"+ averT+"℃    ");
+                max.setText("最高:" + maxT +"℃    ");
+                min.setText("最低:" + minT +"℃    ");
             }
         });
+
     }
+
+    public void setBatterytv(double battery){
+        runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                batterytv.setText("当前电量："+battery);
+            }
+        });
+
+    }
+
 
 
     @Override
@@ -455,7 +282,6 @@ public class InfraredActivity extends AppCompatActivity implements Device.Delega
             }
         });
         setText("丢失与红外相机的连接");
-        flirOneDevice = null;
 
     }
 

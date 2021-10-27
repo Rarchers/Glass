@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
     package="com.example.glass">
 
     <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
@@ -18,9 +19,17 @@
     <uses-permission android:name="android.permission.READ_PRIVILEGED_PHONE_STATE" />
     <uses-permission android:name="android.permission.WAKE_LOCK" />
     <uses-permission android:name="android.permission.CAMERA" />
+    <uses-permission android:name="android.permission.RECORD_AUDIO" />
+
 
     <uses-feature android:name="android.hardware.camera" />
+    <uses-feature android:name="android.hardware.usb.host" android:required="true" />
 
+    <uses-sdk android:minSdkVersion="21"
+        android:targetSdkVersion="29" />
+    <uses-feature
+        android:glEsVersion="0x00030000"
+        android:required="true" />
     <application
         android:name=".application.InstructionApplication"
         android:allowBackup="true"
@@ -29,6 +38,7 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/Theme.Glass">
+
         <activity
             android:name=".ui.view.VedioActivity"
             android:exported="true" />
@@ -41,7 +51,11 @@
             android:exported="true" />
         <activity
             android:name=".ui.view.InfraredSettingActivity"
-            android:exported="true" />
+
+            android:exported="true" >
+
+
+        </activity>
         <activity
             android:name=".ui.view.SettingActivity"
             android:exported="true" />
@@ -52,9 +66,7 @@
             <intent-filter>
                 <action android:name="android.hardware.usb.action.USB_DEVICE_ATTACHED" />
             </intent-filter>
-
-            <meta-data
-                android:name="android.hardware.usb.action.USB_DEVICE_ATTACHED"
+            <meta-data android:name="android.hardware.usb.action.USB_DEVICE_ATTACHED"
                 android:resource="@xml/device_filter" />
         </activity>
         <activity

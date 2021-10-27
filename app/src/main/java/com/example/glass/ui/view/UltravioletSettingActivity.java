@@ -56,11 +56,14 @@ public class UltravioletSettingActivity extends AppCompatActivity {
         information = findViewById(R.id.ultravioletInformation);
         ultravioletscrollView = findViewById(R.id.ultravioletscrollView);
 
-        serverAddress = new InetSocketAddress(Config.remoteIP_PhoneUse,
+        serverAddress = new InetSocketAddress(Config.remoteIP,
                 20000);
         try{
+            socket = null;
+            sendrtp = null;
+
             socket = new RtpSocket(new SipdroidSocket(20000));
-            sendrtp = new RtpSocket(new SipdroidSocket(1234), InetAddress.getByName(Config.remoteIP_PhoneUse),20000);
+            sendrtp = new RtpSocket(new SipdroidSocket(1234), InetAddress.getByName(Config.remoteIP),20000);
         }catch (Exception e){
             e.printStackTrace();
         }
@@ -101,6 +104,8 @@ public class UltravioletSettingActivity extends AppCompatActivity {
                         socket.socket.receive(packet);
                         String receivemsg = new String(data).trim();
                         setText(receivemsg,0);
+                        clientAddress = new InetSocketAddress(Config.remoteIP,20000);
+                        socket.send("reveiced",clientAddress);
 
                     } catch (IOException e) {
                         e.printStackTrace();
