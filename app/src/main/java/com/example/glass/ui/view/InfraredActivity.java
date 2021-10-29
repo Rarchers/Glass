@@ -61,6 +61,7 @@ import com.rokid.glass.instruct.InstructLifeManager;
 import com.rokid.glass.instruct.entity.EntityKey;
 import com.rokid.glass.instruct.entity.IInstructReceiver;
 import com.rokid.glass.instruct.entity.InstructEntity;
+import com.rokid.glass.ui.button.GlassButton;
 
 
 public class InfraredActivity extends AppCompatActivity{
@@ -70,19 +71,21 @@ public class InfraredActivity extends AppCompatActivity{
     private TextView aver,max,min,batterytv; //最高-平均
     private SoundPool sp;
     private int sound;
-
+    private GlassButton getpic;
     private int maxX, maxY;
     private TextView information;
     private StringBuilder builder = new StringBuilder();
     private int width;
     private int height;
-    private short[] thermalPixels;
+
     private ScrollView scrollView;
     private double maxTemp, meantTemp,minTemp;//最高-平均温度
     Camera cameraInstance;
     private InstructLifeManager mLifeManager;
     RemoteControl remoteControl;
     Palette palette;
+
+    boolean startPic = false;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -95,7 +98,15 @@ public class InfraredActivity extends AppCompatActivity{
         max = (TextView) findViewById(R.id.max);
         min = (TextView) findViewById(R.id.min);
         batterytv = findViewById(R.id.battery);
+        getpic = findViewById(R.id.getpic);
 
+
+        getpic.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                startPic = true;
+            }
+        });
 
 
         configInstruct();
@@ -196,6 +207,84 @@ public class InfraredActivity extends AppCompatActivity{
             cameraInstance.withImage((thermalImage) -> {
                 thermalImage.setPalette(palette);
                 JavaImageBuffer javaBuffer = thermalImage.getImage();
+                byte[] pixels = javaBuffer.pixelBuffer;
+
+                if (startPic){
+                    runOnUiThread(new Runnable() {
+                        @Override
+                        public void run() {
+                            Toast.makeText(InfraredActivity.this, "拍照上传！！", Toast.LENGTH_SHORT).show();
+                            setText("点击了拍照上传");
+                        }
+                    });
+                    startPic = false;
+
+
+                    new Thread(new Runnable() {
+                        @Override
+                        public void run() {
+                            uploadPic(javaBuffer);
+                        }
+                    }).start();
+                }
+
+
+
+                width = thermalImage.getWidth();
+                height = thermalImage.getHeight();
+                int centerPixelIndex = width * (height / 2) + (width / 2);
+                int[] centerPixelIndexes = new int[]{
+                        centerPixelIndex, centerPixelIndex - 1, centerPixelIndex + 1,
+                        centerPixelIndex - width,
+                        centerPixelIndex - width - 1,
+                        centerPixelIndex - width + 1,
+                        centerPixelIndex + width,
+                        centerPixelIndex + width - 1,
+                        centerPixelIndex + width + 1
+                };
+                int pixelTemp;
+                double pixelCMax = 0,pixelCMin = 100;
+                int maxIndex = 0;
+                double pixelCAll = 0;
+                double[] temp = new double[width * height];
+                for (int i = 0; i < width * height; i++) {
+                    pixelTemp = pixels[i] & 0xffff;
+                    temp[i] = (pixelTemp*1.0 / 100) - 273.15;
+                    pixelCMax = Math.max(pixelCMax, temp[i]);
+                    pixelCMin = Math.min(pixelCMin, temp[i]);
+                    if (pixelCMax == temp[i]) {
+                        maxIndex = i;
+                    }
+                    pixelCAll += temp[i];
+                    meantTemp = pixelCAll / (width * height); //全屏平均温度
+                }
+
+                maxTemp = pixelCMax; //全屏最高温度
+                minTemp = pixelCMin;
+                maxX = maxIndex % width; //最高温度x坐标
+                maxY = maxIndex / width; //最高温度y坐标
+
+
+                double averageTemp = 0;
+
+                for (int i = 0; i < centerPixelIndexes.length; i++) {  //centerPixelIndexes.length = 9
+                    // Remember: all primitives are signed, we want the unsigned value,
+                    // we could also use renderedImage.thermalPixelValues() instead
+                    int pixelValue = (pixels[centerPixelIndexes[i]]) & 0xffff;
+                    averageTemp += (((double) pixelValue) - averageTemp) / ((double) i + 1);
+                }
+                //Log.i("centerPixelIndex", centerPixelIndexes.length + "");
+                double averageC = (averageTemp / 100) - 273.15;
+
+
+                Message msg = new Message();
+                msg.what = (int) meantTemp;
+                msg.arg1 = (int) maxTemp;
+                msg.arg2 = (int) minTemp;
+                handleTemp.sendMessage(msg);
+
+
+
                 android.graphics.Bitmap bmp = BitmapAndroid.createBitmap(javaBuffer).getBitMap();
                 // refresh UI with the new android.graphics.Bitmap
                 updateThermalImageView(bmp);
@@ -231,6 +320,18 @@ public class InfraredActivity extends AppCompatActivity{
 //            finish();
 //        }
 //    }
+    private Handler handleTemp = new Handler(){
+        public void handleMessage(Message msg) {
+            setTemp(msg.what,msg.arg1,msg.arg2);
+            super.handleMessage(msg);
+        }
+    };
+
+
+    private void uploadPic(JavaImageBuffer buffer){
+
+    }
+
 
 
     private void updateThermalImageView(final Bitmap frame) {

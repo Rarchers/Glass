@@ -18,6 +18,10 @@
         android:layout_height="fill_parent"
         android:layout_gravity="center_horizontal|top"/>
 
+
+
+
+
     <FrameLayout
         android:id="@+id/fullscreen_content"
         android:layout_width="match_parent"
@@ -157,4 +161,28 @@
         android:shadowDy="0"
         android:shadowRadius="3"
         android:textAppearance="?android:attr/textAppearanceSmall" />
+
+
+    <FrameLayout
+        android:id="@+id/frameUltraviolet"
+        android:layout_gravity="right"
+        android:layout_width="200dp"
+        android:orientation="horizontal"
+        android:layout_height="wrap_content"
+        tools:ignore="RtlHardcoded">
+        <TextView
+            android:layout_width="wrap_content"
+            android:text="拍照上传"
+            android:textColor="@color/white"
+            android:layout_gravity="center"
+            android:layout_height="wrap_content">
+        </TextView>
+        <com.rokid.glass.ui.button.GlassButton
+            android:id="@+id/getpic"
+            android:layout_width="200dp"
+            android:layout_gravity="center"
+            android:layout_height="wrap_content">
+        </com.rokid.glass.ui.button.GlassButton>
+    </FrameLayout>
+
 </FrameLayout>
