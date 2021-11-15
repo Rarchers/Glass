@@ -133,24 +133,20 @@ public class InfraredActivity extends AppCompatActivity{
         cameraInstance = new Camera();
         remoteControl = cameraInstance.getRemoteControl();
         palette = PaletteManager.getDefaultPalettes().get(0);
-        if(remoteControl != null) { // check if device supports RemoteControl
-            Battery battery = remoteControl.getBattery();
-            if(battery != null) { // check if device supports Battery
-                // read out battery status and percentage once
-//                Battery.ChargingState state = battery.chargingState().getSync();
-   //             int percentageLeft = battery.percentage().getSync();
-                // subscribe for updates related with battery state and percentage left
-                // assuming Battery.BatteryStateListener instance is stateListener
-                // assuming Battery.BatteryPercentageListener instance is
-  //              setBatterytv(percentageLeft);
-            }
-        }
+
         DiscoveryFactory.getInstance().scan(aDiscoveryEventListener, CommunicationInterface.USB);
         setText("开始搜寻相机，请确保相机已开机并连接");
         setText("若长时间无画面请检查相机后重新进入此页面...");
 
+
     }
 
+    Battery.BatteryPercentageListener percentageListener = new Battery.BatteryPercentageListener() {
+        @Override
+        public void onPercentageChange(int i) {
+            setBatterytv(i);
+        }
+    };
 
     ConnectionStatusListener listener = new ConnectionStatusListener() {
         @Override
@@ -173,6 +169,25 @@ public class InfraredActivity extends AppCompatActivity{
                       //  cameraInstance.connect(identity, listener, new ConnectParameters(2000));
                         cameraInstance.connect(identity,listener);
                         cameraInstance.subscribeStream(streamingCallbackImpl);
+                        if(remoteControl != null) { // check if device supports RemoteControl
+                            Battery battery = remoteControl.getBattery();
+                            if(battery != null) { // check if device supports Battery
+                                // read out battery status and percentage once
+                                Battery.ChargingState state = battery.getChargingState();
+                                int percentageLeft = battery.getPercentage();
+                                setBatterytv(percentageLeft);
+                                // subscribe for updates related with battery state and percentage left
+                                // assuming Battery.BatteryStateListener instance is stateListener
+                                // assuming Battery.BatteryPercentageListener instance ispercentageListener
+                                try {
+                                    battery.subscribePercentage(percentageListener);
+                                }catch (Exception e){
+                                    setText(e.getMessage());
+                                }
+
+                            }
+                        }
+
                     } catch (Exception e) {
                         e.printStackTrace();
                         setText("连接出错啦！"+e.getMessage());
@@ -207,7 +222,6 @@ public class InfraredActivity extends AppCompatActivity{
             cameraInstance.withImage((thermalImage) -> {
                 thermalImage.setPalette(palette);
                 JavaImageBuffer javaBuffer = thermalImage.getImage();
-                byte[] pixels = javaBuffer.pixelBuffer;
 
                 if (startPic){
                     runOnUiThread(new Runnable() {
@@ -230,7 +244,7 @@ public class InfraredActivity extends AppCompatActivity{
 
 
 
-                width = thermalImage.getWidth();
+              /*  width = thermalImage.getWidth();
                 height = thermalImage.getHeight();
                 int centerPixelIndex = width * (height / 2) + (width / 2);
                 int[] centerPixelIndexes = new int[]{
@@ -276,11 +290,14 @@ public class InfraredActivity extends AppCompatActivity{
                 //Log.i("centerPixelIndex", centerPixelIndexes.length + "");
                 double averageC = (averageTemp / 100) - 273.15;
 
+*/
+
+
 
                 Message msg = new Message();
                 msg.what = (int) meantTemp;
-                msg.arg1 = (int) maxTemp;
-                msg.arg2 = (int) minTemp;
+                msg.arg1 = (int) (thermalImage.getScale().getRangeMax()- 273.15);
+                msg.arg2 = (int)(thermalImage.getScale().getRangeMin()- 273.15);
                 handleTemp.sendMessage(msg);
 
 

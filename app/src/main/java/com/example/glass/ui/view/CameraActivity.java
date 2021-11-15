@@ -70,6 +70,7 @@ public class CameraActivity extends AppCompatActivity implements Camera2Helper.A
     private AutoFitTextureView textureView;
     private File file;
     private GlassButton infraredButton;
+    private GlassButton ultravioletStartButton;
     public static final String PHOTO_PATH = Environment.getExternalStorageDirectory().getPath();
     public static final String PHOTO_NAME = "camera2";
 
@@ -86,6 +87,7 @@ public class CameraActivity extends AppCompatActivity implements Camera2Helper.A
     private void init(){
         file = new File(PHOTO_PATH, PHOTO_NAME + ".jpg");
         infraredButton = findViewById(R.id.infraredStartButton);
+        ultravioletStartButton = findViewById(R.id.ultravioletStartButton);
         textureView= (AutoFitTextureView) findViewById(R.id.camera_preview);
         camera2Helper=Camera2Helper.getInstance(CameraActivity.this,textureView,file);
         camera2Helper.setAfterDoListener(this);
@@ -97,10 +99,23 @@ public class CameraActivity extends AppCompatActivity implements Camera2Helper.A
             }
         });
 
+        ultravioletStartButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                startUltraviolet(CameraActivity.this);
+            }
+        });
+
     }
 
     private void startInfrared(Activity activity){
         Intent intent = new Intent(activity,InfraredActivity.class);
+        startActivity(intent);
+    }
+
+
+    private void startUltraviolet(Activity activity){
+        Intent intent = new Intent(activity,UltravioletActivity.class);
         startActivity(intent);
     }
 
@@ -160,8 +175,7 @@ public class CameraActivity extends AppCompatActivity implements Camera2Helper.A
                         .setCallback(new IInstructReceiver() {
                             @Override
                             public void onInstructReceive(Activity act, String key, InstructEntity instruct) {
-                                Toast.makeText(act, "暂无集成接入", Toast.LENGTH_SHORT).show();
-
+                                startUltraviolet(act);
                             }
                         })
         ).addInstructEntity(

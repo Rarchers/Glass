@@ -29,10 +29,11 @@ public class MainActivity extends AppCompatActivity {
 
     private InstructLifeManager mLifeManager;
 
-    private GlassButton ultraviolet;
-    private GlassButton infrared;
+    private GlassButton download;
+    private GlassButton help;
     private GlassButton camera;
-    private GlassButton video;
+    private GlassButton setting;
+    private GlassButton history;
     private StringBuilder builder = new StringBuilder();
     private String TAG ="AUDIO";
 
@@ -48,42 +49,50 @@ public class MainActivity extends AppCompatActivity {
 
 
     public void initView(){
-       ultraviolet = findViewById(R.id.ultravioletButton);
-       infrared = findViewById(R.id.infraredButton);
-       camera = findViewById(R.id.cameraButton);
-       video = findViewById(R.id.videoButton);
-       camera.setClickable(true);
-       video.setClickable(true);
-       ultraviolet.setClickable(true);
-       infrared.setClickable(true);
+        download = findViewById(R.id.downloadButton);
+        help = findViewById(R.id.helpButton);
+        camera = findViewById(R.id.cameraButton);
+        history = findViewById(R.id.historyButton);
+        setting = findViewById(R.id.settingButton);
 
-       camera.setOnClickListener(new View.OnClickListener() {
-           @Override
-           public void onClick(View view) {
-               openCamera(MainActivity.this);
-           }
-       });
+        download.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                openDownload(MainActivity.this);
+            }
+        });
 
-       video.setOnClickListener(new View.OnClickListener() {
-           @Override
-           public void onClick(View view) {
-               openVideo(MainActivity.this);
-           }
-       });
+        camera.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                openCamera(MainActivity.this);
+            }
+        });
 
-       ultraviolet.setOnClickListener(new View.OnClickListener() {
-           @Override
-           public void onClick(View v) {
-               openUltraviolet(MainActivity.this);
-           }
-       });
 
-       infrared.setOnClickListener(new View.OnClickListener() {
-           @Override
-           public void onClick(View v) {
-               openInfrared(MainActivity.this);
-           }
-       });
+        help.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                openHelp(MainActivity.this);
+            }
+        });
+
+        setting.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                openSetting(MainActivity.this);
+            }
+        });
+
+        history.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                openHistory(MainActivity.this);
+            }
+        });
+
+
+
     }
 
     private void openCamera(Activity activity){
@@ -91,18 +100,26 @@ public class MainActivity extends AppCompatActivity {
         startActivity(intent);
     }
 
-    private void openUltraviolet(Activity activity){
-        Intent intent = new Intent(activity,UltravioletActivity.class);
-        startActivity(intent);
+    private void openSetting(Activity activity){
+//        Intent intent = new Intent(activity,UltravioletActivity.class);
+//        startActivity(intent);
+        Toast.makeText(activity, "暂未开放", Toast.LENGTH_SHORT).show();
     }
-    private void openInfrared(Activity activity){
-        Intent intent = new Intent(activity,InfraredActivity.class);
+    private void openHelp(Activity activity){
+        Intent intent = new Intent(activity,VedioActivity.class);
         startActivity(intent);
     }
 
-    private void openVideo(Activity activity){
-        Intent intent = new Intent(activity,UltravioletSettingActivity.class);
-        startActivity(intent);
+    private void openDownload(Activity activity){
+//        Intent intent = new Intent(activity,UltravioletSettingActivity.class);
+//        startActivity(intent);
+        Toast.makeText(activity, "暂未开放", Toast.LENGTH_SHORT).show();
+    }
+
+    private void openHistory(Activity activity){
+//        Intent intent = new Intent(activity,UltravioletSettingActivity.class);
+//        startActivity(intent);
+        Toast.makeText(activity, "暂未开放", Toast.LENGTH_SHORT).show();
     }
 
 
@@ -110,7 +127,7 @@ public class MainActivity extends AppCompatActivity {
         mLifeManager = new InstructLifeManager(this, getLifecycle(), mInstructLifeListener);
         mLifeManager.addInstructEntity(
                 new InstructEntity()
-                        .addEntityKey(new EntityKey("普通相机模块", null))
+                        .addEntityKey(new EntityKey("开始巡检", null))
                         .addEntityKey(new EntityKey(EntityKey.Language.en, "camera"))
                         .setShowTips(true)
                         .setCallback(new IInstructReceiver() {
@@ -123,27 +140,43 @@ public class MainActivity extends AppCompatActivity {
         )
                 .addInstructEntity(
                         new InstructEntity()
-                                .addEntityKey(new EntityKey("红外模块", null))
-                                .addEntityKey(new EntityKey(EntityKey.Language.en, "infrared"))
+                                .addEntityKey(new EntityKey("远程协助", null))
+                                .addEntityKey(new EntityKey(EntityKey.Language.en, "help"))
                                 .setShowTips(true)
                                 .setCallback(new IInstructReceiver() {
                                     @Override
                                     public void onInstructReceive(Activity act, String key, InstructEntity instruct) {
                                         if (act != null)
-                                        openInfrared(act);
+                                        openHelp(act);
                                     }
                                 })
                 )
+
+
                 .addInstructEntity(
                         new InstructEntity()
-                                .addEntityKey(new EntityKey("视频通话模块", null))
-                                .addEntityKey(new EntityKey(EntityKey.Language.en, "video"))
+                                .addEntityKey(new EntityKey("历史数据", null))
+                                .addEntityKey(new EntityKey(EntityKey.Language.en, "history"))
                                 .setShowTips(true)
                                 .setCallback(new IInstructReceiver() {
                                     @Override
                                     public void onInstructReceive(Activity act, String key, InstructEntity instruct) {
                                         if (act != null)
-                                            openVideo(act);
+                                            openHistory(act);
+                                    }
+                                })
+                )
+
+                .addInstructEntity(
+                        new InstructEntity()
+                                .addEntityKey(new EntityKey("信息下载", null))
+                                .addEntityKey(new EntityKey(EntityKey.Language.en, "download"))
+                                .setShowTips(true)
+                                .setCallback(new IInstructReceiver() {
+                                    @Override
+                                    public void onInstructReceive(Activity act, String key, InstructEntity instruct) {
+                                        if (act != null)
+                                            openDownload(act);
                                     }
                                 })
                 )
@@ -162,14 +195,14 @@ public class MainActivity extends AppCompatActivity {
                 )
                 .addInstructEntity(
                         new InstructEntity()
-                                .addEntityKey(new EntityKey("紫外模块", null))
-                                .addEntityKey(new EntityKey(EntityKey.Language.en, "ultraviolet"))
+                                .addEntityKey(new EntityKey("设置", null))
+                                .addEntityKey(new EntityKey(EntityKey.Language.en, "setting"))
                                 .setShowTips(true)
                                 .setCallback(new IInstructReceiver() {
                                     @Override
                                     public void onInstructReceive(Activity act, String key, InstructEntity instruct) {
                                         if (act != null) {
-                                         openUltraviolet(act);
+                                        openSetting(act);
                                         }
                                     }
                                 })
