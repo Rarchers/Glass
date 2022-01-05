@@ -1,0 +1,113 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/gray"
+    tools:context=".ui.view.MainActivity">
+
+
+    <FrameLayout
+        android:id="@+id/frameCamera"
+        android:layout_above="@id/frameHelp"
+        android:layout_width="match_parent"
+        android:orientation="horizontal"
+        android:layout_height="wrap_content">
+        <TextView
+            android:layout_width="wrap_content"
+            android:text="开始巡检"
+            android:layout_gravity="center"
+            android:layout_height="wrap_content">
+        </TextView>
+        <com.rokid.glass.ui.button.GlassButton
+            android:id="@+id/cameraButton"
+            android:layout_width="200dp"
+            android:layout_gravity="center"
+            android:layout_height="wrap_content">
+        </com.rokid.glass.ui.button.GlassButton>
+    </FrameLayout>
+
+    <FrameLayout
+        android:layout_centerVertical="true"
+        android:id="@+id/frameHelp"
+        android:layout_width="match_parent"
+        android:orientation="horizontal"
+        android:layout_height="wrap_content">
+        <TextView
+            android:layout_width="wrap_content"
+            android:text="远程协助"
+            android:layout_gravity="center"
+            android:layout_height="wrap_content">
+        </TextView>
+        <com.rokid.glass.ui.button.GlassButton
+            android:id="@+id/helpButton"
+            android:layout_width="200dp"
+            android:layout_gravity="center"
+            android:layout_height="wrap_content">
+        </com.rokid.glass.ui.button.GlassButton>
+    </FrameLayout>
+
+    <FrameLayout
+        android:id="@+id/frameDownload"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/frameHelp"
+        android:orientation="horizontal">
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:text="信息下载"></TextView>
+
+        <com.rokid.glass.ui.button.GlassButton
+            android:id="@+id/downloadButton"
+            android:layout_width="200dp"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"></com.rokid.glass.ui.button.GlassButton>
+    </FrameLayout>
+
+
+    <FrameLayout
+        android:id="@+id/frameHistory"
+        android:layout_below="@id/frameDownload"
+        android:layout_width="match_parent"
+        android:orientation="horizontal"
+        android:layout_height="wrap_content">
+        <TextView
+            android:layout_width="wrap_content"
+            android:text="历史数据"
+            android:layout_gravity="center"
+            android:layout_height="wrap_content">
+        </TextView>
+        <com.rokid.glass.ui.button.GlassButton
+            android:id="@+id/historyButton"
+            android:layout_width="200dp"
+            android:layout_gravity="center"
+            android:layout_height="wrap_content">
+        </com.rokid.glass.ui.button.GlassButton>
+    </FrameLayout>
+
+
+    <FrameLayout
+        android:id="@+id/frameSetting"
+        android:layout_above="@id/frameCamera"
+        android:layout_width="match_parent"
+        android:orientation="horizontal"
+        android:layout_height="wrap_content">
+        <TextView
+            android:layout_width="wrap_content"
+            android:text="设置"
+            android:layout_gravity="center"
+            android:layout_height="wrap_content">
+        </TextView>
+        <com.rokid.glass.ui.button.GlassButton
+            android:id="@+id/settingButton"
+            android:layout_width="200dp"
+            android:layout_gravity="center"
+            android:layout_height="wrap_content">
+        </com.rokid.glass.ui.button.GlassButton>
+    </FrameLayout>
+
+</RelativeLayout>
