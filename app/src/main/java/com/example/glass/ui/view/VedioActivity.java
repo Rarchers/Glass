@@ -103,6 +103,10 @@ public class VedioActivity extends AppCompatActivity {
      */
     public void doStart() {
 
+        //TODO: 应该是全都需要修改，直接推送本地的数据到服务器上就行，不需要获取服务器的视频，但需要开一个新的线程实时拉取服务器的绘制图案并进行展示
+
+        //TODO: 同时开一个socket 来进行音频的传输
+
         //初始化解码器
         if (rtp_socket == null) {
             try {
@@ -125,6 +129,7 @@ public class VedioActivity extends AppCompatActivity {
             isRunning = true;
             DecoderThread decoder = new DecoderThread();
             decoder.start(); //启动一个线程
+
 
             //初始化发送包
             rtp_send_packet = new RtpPacket(socket_send_Buffer, 0);
@@ -310,6 +315,20 @@ public class VedioActivity extends AppCompatActivity {
         {
         }
     }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 }
