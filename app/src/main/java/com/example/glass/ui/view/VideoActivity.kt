@@ -13,6 +13,12 @@ import com.example.glass.component.Config
 import com.takusemba.rtmppublisher.Publisher
 import com.takusemba.rtmppublisher.PublisherListener
 import com.example.glass.R
+import com.example.glass.component.video.CameraDrawer
+import com.example.glass.component.video.CameraTestString
+import com.example.glass.component.video.drawerbean.*
+import org.json.JSONArray
+import org.json.JSONObject
+import kotlin.concurrent.thread
 
 class VideoActivity : AppCompatActivity(), PublisherListener {
 
@@ -22,11 +28,13 @@ class VideoActivity : AppCompatActivity(), PublisherListener {
     private lateinit var publishButton: Button
     private lateinit var cameraButton: ImageView
     private lateinit var label: TextView
+    private lateinit var cameraDrawer : CameraDrawer
 
     private val url = Config.VIDEO_PUSH
     private val handler = Handler()
     private var thread: Thread? = null
     private var isCounting = false
+
 
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -42,6 +50,7 @@ class VideoActivity : AppCompatActivity(), PublisherListener {
         publishButton = findViewById(R.id.toggle_publish)
         cameraButton = findViewById(R.id.toggle_camera)
         label = findViewById(R.id.live_label)
+        cameraDrawer = findViewById(R.id.cameraDrawer)
 
 
         if (url == "") {
@@ -71,6 +80,79 @@ class VideoActivity : AppCompatActivity(), PublisherListener {
                 publisher.switchCamera()
             }
         }
+
+        thread {
+            //请求Data数据，更新绘制图案
+            while (true){
+                val data = CameraTestString.data
+
+                val jsonData = JSONObject(data)
+                val list = jsonData.getString("list")
+                val jsonLists = JSONArray(list)
+                val dataArray = ArrayList<DataBean>()
+                for (i in 0 until jsonLists.length()){
+                    val item = jsonLists.getJSONObject(i)
+                    when(item.getString("type")){
+                        "rect" ->{
+                            val rect = RectBean("rect").also {
+                                it.maxX = item.getLong("maxX")
+                                it.maxY = item.getLong("maxY")
+                                it.minX = item.getLong("minX")
+                                it.minY = item.getLong("minY")
+                            }
+                            dataArray.add(rect)
+                        }
+                        "circle" ->{
+                            val circle = CircleBean("circle").also{
+                                it.radius = item.getLong("radius")
+                                it.x = item.getLong("x")
+                                it.y = item.getLong("y")
+                            }
+                            dataArray.add(circle)
+                        }
+
+                        "textbox" ->{
+                            val text = TextBean("textbox").also {
+                                it.text = item.getString("text")
+                                it.x = item.getLong("x")
+                                it.y = item.getLong("y")
+                            }
+                            dataArray.add(text)
+                        }
+
+                        "triangle" ->{
+                            val triangleBean = TriangleBean("triangle").also{
+                                val tlJSON = item.getJSONObject("tl")
+                                val blJSON = item.getJSONObject("bl")
+                                val brJSON = item.getJSONObject("br")
+                                it.blx = blJSON.getLong("x")
+                                it.bly = blJSON.getLong("y")
+
+                                it.brx = brJSON.getLong("x")
+                                it.bry = brJSON.getLong("y")
+
+                                it.tlx = tlJSON.getLong("x")
+                                it.tly = tlJSON.getLong("y")
+                            }
+
+                            dataArray.add(triangleBean)
+
+                        }
+                    }
+                }
+                cameraDrawer.updateData(dataArray)
+            }
+
+
+        }
+
+
+
+
+
+
+
+
     }
     override fun onResume() {
         super.onResume()
