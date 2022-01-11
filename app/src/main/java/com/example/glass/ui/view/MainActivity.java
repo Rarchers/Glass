@@ -106,14 +106,14 @@ public class MainActivity extends AppCompatActivity {
         Toast.makeText(activity, "暂未开放", Toast.LENGTH_SHORT).show();
     }
     private void openHelp(Activity activity){
-        Intent intent = new Intent(activity,VedioActivity.class);
+        Intent intent = new Intent(activity,VideoActivity.class);
         startActivity(intent);
     }
 
     private void openDownload(Activity activity){
-//        Intent intent = new Intent(activity,UltravioletSettingActivity.class);
+//        Intent intent = new Intent(activity, com.example.glass.component.video.rtmpfile.MainActivity.class);
 //        startActivity(intent);
-        Toast.makeText(activity, "暂未开放", Toast.LENGTH_SHORT).show();
+       // Toast.makeText(activity, "暂未开放", Toast.LENGTH_SHORT).show();
     }
 
     private void openHistory(Activity activity){

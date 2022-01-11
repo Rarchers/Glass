@@ -2,4 +2,17 @@
     <string name="app_name">Glass</string>
     <string name="txtTuning_cn">加载中...</string>
     <string name="Please_Connect_FLIR_One">请连接一个FLIR One设备</string>
+
+
+    <string name="start_publishing">开始推流</string>
+    <string name="stop_publishing">停止推流</string>
+    <string name="started_publishing">推流中</string>
+    <string name="stopped_publishing">推流停止</string>
+    <string name="disconnected_publishing">推流掉线了</string>
+    <string name="failed_publishing">连接失败</string>
+
+    <string name="error_empty_url">URL 为空</string>
+
+    <string name="publishing_label">LIVE  %1$s:%2$s</string>
+
 </resources>

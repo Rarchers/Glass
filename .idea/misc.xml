@@ -3,11 +3,17 @@
   <component name="DesignSurface">
     <option name="filePathToZoomLevelMap">
       <map>
+        <entry key="..\:/Project/Design/Glass/app/src/main/res/drawable/ic_switch.xml" value="0.38229166666666664" />
+        <entry key="..\:/Project/Design/Glass/app/src/main/res/drawable/round_corner_red.xml" value="0.38229166666666664" />
+        <entry key="..\:/Project/Design/Glass/app/src/main/res/drawable/round_corner_white.xml" value="0.38229166666666664" />
         <entry key="..\:/Project/Design/Glass/app/src/main/res/drawable/surface_bg.xml" value="0.22083333333333333" />
         <entry key="..\:/Project/Design/Glass/app/src/main/res/layout/activity_camera.xml" value="0.36614583333333334" />
+        <entry key="..\:/Project/Design/Glass/app/src/main/res/layout/activity_camera2.xml" value="0.2046875" />
         <entry key="..\:/Project/Design/Glass/app/src/main/res/layout/activity_infrared.xml" value="0.34193840579710144" />
         <entry key="..\:/Project/Design/Glass/app/src/main/res/layout/activity_infrared_setting.xml" value="0.36614583333333334" />
         <entry key="..\:/Project/Design/Glass/app/src/main/res/layout/activity_main.xml" value="0.5" />
+        <entry key="..\:/Project/Design/Glass/app/src/main/res/layout/activity_main2.xml" value="0.2046875" />
+        <entry key="..\:/Project/Design/Glass/app/src/main/res/layout/activity_push_file_rtmp.xml" value="0.2046875" />
         <entry key="..\:/Project/Design/Glass/app/src/main/res/layout/activity_setting.xml" value="0.2857789855072464" />
         <entry key="..\:/Project/Design/Glass/app/src/main/res/layout/activity_ultraviolet.xml" value="0.34193840579710144" />
         <entry key="..\:/Project/Design/Glass/app/src/main/res/layout/activity_ultraviolet_setting.xml" value="0.36614583333333334" />

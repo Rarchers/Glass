@@ -22,7 +22,10 @@
     <uses-permission android:name="android.permission.WAKE_LOCK" />
     <uses-permission android:name="android.permission.CAMERA" />
     <uses-permission android:name="android.permission.RECORD_AUDIO" />
-
+    <uses-feature android:name="android.hardware.camera" />
+    <uses-feature android:name="android.hardware.camera.autofocus" />
+    <uses-permission android:name="android.permission.CAMERA" />
+    <uses-permission android:name="android.permission.FLASHLIGHT" />
 
     <uses-feature android:name="android.hardware.camera" />
     <uses-feature android:name="android.hardware.usb.host" android:required="true" />
@@ -42,7 +45,7 @@
         android:theme="@style/Theme.Glass">
 
         <activity
-            android:name=".ui.view.VedioActivity"
+            android:name=".ui.view.VideoActivity"
             android:exported="true" />
         <activity
             android:name=".ui.view.CameraActivity"
@@ -58,6 +61,8 @@
 
 
         </activity>
+
+
         <activity
             android:name=".ui.view.SettingActivity"
             android:exported="true" />
