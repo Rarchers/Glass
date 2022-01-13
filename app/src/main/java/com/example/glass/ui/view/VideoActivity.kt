@@ -83,13 +83,16 @@ class VideoActivity : AppCompatActivity(), PublisherListener {
             publishButton.setOnClickListener {
                 if (publisher.isPublishing) {
                     publisher.stopPublishing()
+                    Toast.makeText(applicationContext, "当前状态：停止推流", Toast.LENGTH_SHORT).show()
                 } else {
                     publisher.startPublishing()
+                    Toast.makeText(applicationContext, "当前状态：开始推流", Toast.LENGTH_SHORT).show()
                 }
             }
 
             cameraButton.setOnClickListener {
                 publisher.switchCamera()
+                Toast.makeText(applicationContext, "切换摄像头", Toast.LENGTH_SHORT).show()
             }
         }
         //TODO:测试代码
