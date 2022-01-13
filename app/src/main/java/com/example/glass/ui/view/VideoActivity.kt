@@ -4,6 +4,7 @@ import android.app.ProgressDialog.show
 import android.opengl.GLSurfaceView
 import android.os.Bundle
 import android.os.Handler
+import android.util.Log
 import android.view.Gravity
 import android.view.View
 import android.view.WindowManager
@@ -18,7 +19,15 @@ import com.example.glass.component.video.CameraTestString
 import com.example.glass.component.video.drawerbean.*
 import org.json.JSONArray
 import org.json.JSONObject
+import java.io.BufferedReader
+import java.io.IOException
+import java.io.InputStreamReader
+import java.io.OutputStream
+import java.net.HttpURLConnection
+import java.net.URL
+import java.net.URLConnection
 import kotlin.concurrent.thread
+import kotlin.coroutines.CoroutineContext
 
 class VideoActivity : AppCompatActivity(), PublisherListener {
 
@@ -33,7 +42,10 @@ class VideoActivity : AppCompatActivity(), PublisherListener {
     private val url = Config.VIDEO_PUSH
     private val handler = Handler()
     private var thread: Thread? = null
+    private var drawerThread : Thread? = null
     private var isCounting = false
+    private var drawerUrl : URL = URL(Config.VIDEO_FETCH_PAINT)
+    private val drawerConnection : HttpURLConnection = drawerUrl.openConnection() as HttpURLConnection
 
 
 
@@ -80,78 +92,8 @@ class VideoActivity : AppCompatActivity(), PublisherListener {
                 publisher.switchCamera()
             }
         }
-
-        thread {
-            //请求Data数据，更新绘制图案
-            while (true){
-                val data = CameraTestString.data
-
-                val jsonData = JSONObject(data)
-                val list = jsonData.getString("list")
-                val jsonLists = JSONArray(list)
-                val dataArray = ArrayList<DataBean>()
-                for (i in 0 until jsonLists.length()){
-                    val item = jsonLists.getJSONObject(i)
-                    when(item.getString("type")){
-                        "rect" ->{
-                            val rect = RectBean("rect").also {
-                                it.maxX = item.getLong("maxX")
-                                it.maxY = item.getLong("maxY")
-                                it.minX = item.getLong("minX")
-                                it.minY = item.getLong("minY")
-                            }
-                            dataArray.add(rect)
-                        }
-                        "circle" ->{
-                            val circle = CircleBean("circle").also{
-                                it.radius = item.getLong("radius")
-                                it.x = item.getLong("x")
-                                it.y = item.getLong("y")
-                            }
-                            dataArray.add(circle)
-                        }
-
-                        "textbox" ->{
-                            val text = TextBean("textbox").also {
-                                it.text = item.getString("text")
-                                it.x = item.getLong("x")
-                                it.y = item.getLong("y")
-                            }
-                            dataArray.add(text)
-                        }
-
-                        "triangle" ->{
-                            val triangleBean = TriangleBean("triangle").also{
-                                val tlJSON = item.getJSONObject("tl")
-                                val blJSON = item.getJSONObject("bl")
-                                val brJSON = item.getJSONObject("br")
-                                it.blx = blJSON.getLong("x")
-                                it.bly = blJSON.getLong("y")
-
-                                it.brx = brJSON.getLong("x")
-                                it.bry = brJSON.getLong("y")
-
-                                it.tlx = tlJSON.getLong("x")
-                                it.tly = tlJSON.getLong("y")
-                            }
-
-                            dataArray.add(triangleBean)
-
-                        }
-                    }
-                }
-                cameraDrawer.updateData(dataArray)
-            }
-
-
-        }
-
-
-
-
-
-
-
+        //TODO:测试代码
+        postDraw(CameraTestString.data)
 
     }
     override fun onResume() {
@@ -217,6 +159,64 @@ class VideoActivity : AppCompatActivity(), PublisherListener {
             }
         }
         thread?.start()
+
+        drawerThread = Thread{
+            var lastTime = System.currentTimeMillis()
+            while (isCounting){
+                if (System.currentTimeMillis() - lastTime >= Config.DRAWER_TIME){
+                    lastTime = System.currentTimeMillis()
+                    //网络请求获取数据
+                    val result = requestDrawer()
+                    if (result != ""){
+                        postDraw(result)
+                    }
+                }
+            }
+        }
+
+        drawerThread?.start()
+
+
+
+    }
+
+
+    private fun requestDrawer() : String{
+        var result: String? = ""
+        var `in`: BufferedReader? = null
+        try {
+            // 设置通用的请求属性
+            drawerConnection.setRequestProperty("accept", "*/*")
+            drawerConnection.setRequestProperty("connection", "Keep-Alive")
+            drawerConnection.setRequestProperty(
+                "user-agent",
+                "okhttp/4.9.1"
+            )
+            // 建立实际的连接
+            drawerConnection.connect()
+            // 获取所有响应头字段
+            // 定义 BufferedReader输入流来读取URL的响应
+            `in` = BufferedReader(
+                InputStreamReader(
+                    drawerConnection.inputStream
+                )
+            )
+            var line: String?
+            while (`in`.readLine().also { line = it } != null) {
+                result += line
+            }
+        } catch (e: Exception) {
+            println("发送GET请求出现异常！$e")
+            e.printStackTrace()
+        } // 使用finally块来关闭输入流
+        finally {
+            try {
+                `in`?.close()
+            } catch (e2: Exception) {
+                e2.printStackTrace()
+            }
+        }
+        return result!!
     }
 
     private fun stopCounting() {
@@ -224,11 +224,86 @@ class VideoActivity : AppCompatActivity(), PublisherListener {
         label.text = ""
         label.visibility = View.GONE
         thread?.interrupt()
+        drawerThread?.interrupt()
     }
 
     private fun Long.format(): String {
         return String.format("%02d", this)
     }
+
+
+    private fun postDraw(data : String){
+        thread {
+            //请求Data数据，更新绘制图案
+            try {
+                val jsonData = JSONObject(data)
+                val list = jsonData.getString("list")
+                val jsonLists = JSONArray(list)
+                val dataArray = ArrayList<DataBean>()
+                for (i in 0 until jsonLists.length()){
+                    val item = jsonLists.getJSONObject(i)
+                    when(item.getString("type")){
+                        "rect" ->{
+                            val rect = RectBean("rect").also {
+                                it.maxX = item.getLong("maxX")
+                                it.maxY = item.getLong("maxY")
+                                it.minX = item.getLong("minX")
+                                it.minY = item.getLong("minY")
+                            }
+                            dataArray.add(rect)
+                        }
+                        "circle" ->{
+                            val circle = CircleBean("circle").also{
+                                it.radius = item.getLong("radius")
+                                it.x = item.getLong("x")
+                                it.y = item.getLong("y")
+                            }
+                            dataArray.add(circle)
+                        }
+
+                        "textbox" ->{
+                            val text = TextBean("textbox").also {
+                                it.text = item.getString("text")
+                                it.x = item.getLong("x")
+                                it.y = item.getLong("y")
+                            }
+                            dataArray.add(text)
+                        }
+
+                        "triangle" ->{
+                            val triangleBean = TriangleBean("triangle").also{
+                                val tlJSON = item.getJSONObject("tl")
+                                val blJSON = item.getJSONObject("bl")
+                                val brJSON = item.getJSONObject("br")
+                                it.blx = blJSON.getLong("x")
+                                it.bly = blJSON.getLong("y")
+
+                                it.brx = brJSON.getLong("x")
+                                it.bry = brJSON.getLong("y")
+
+                                it.tlx = tlJSON.getLong("x")
+                                it.tly = tlJSON.getLong("y")
+                            }
+
+                            dataArray.add(triangleBean)
+
+                        }
+                    }
+                }
+                cameraDrawer.updateData(dataArray)
+            }catch (e : Exception){
+                runOnUiThread {
+                    Toast.makeText(applicationContext, "解析服务器绘制数据异常\n 错误:${e.message}", Toast.LENGTH_SHORT).show()
+                }
+            }
+
+        }
+
+    }
+
+
+
+
 }
 
 

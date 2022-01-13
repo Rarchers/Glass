@@ -17,4 +17,6 @@ public class Config {
     public final static String VIDEO_VOICE_PORT = "8818";
     public final static String VIDEO_CHECK_SUCCESS = "http://59.67.246.92:8088/live?app=live&stream=stream-1";
     public final static String VIDEO_PUSH = "rtmp://59.67.246.92/live/stream-1";
+
+    public final static int DRAWER_TIME = 500;
 }
