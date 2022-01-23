@@ -99,7 +99,7 @@ class VideoActivity : AppCompatActivity(), PublisherListener {
 
         label.text = getString(R.string.publishing_label, 0L.format(), 0L.format())
 
-        startCounting()
+      //  startCounting()
 
 
         //TODO:测试代码
