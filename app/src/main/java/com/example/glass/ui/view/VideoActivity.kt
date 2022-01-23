@@ -1,6 +1,7 @@
 package com.example.glass.ui.view
 
 import android.app.ProgressDialog.show
+import android.content.pm.ActivityInfo
 import android.opengl.GLSurfaceView
 import android.os.Bundle
 import android.os.Handler
@@ -45,7 +46,7 @@ class VideoActivity : AppCompatActivity(), PublisherListener {
     private var drawerThread : Thread? = null
     private var isCounting = false
     private var drawerUrl : URL = URL(Config.VIDEO_FETCH_PAINT)
-    private val drawerConnection : HttpURLConnection = drawerUrl.openConnection() as HttpURLConnection
+    private var drawerConnection : HttpURLConnection? = null
 
 
 
@@ -73,7 +74,7 @@ class VideoActivity : AppCompatActivity(), PublisherListener {
             publisher = Publisher.Builder(this)
                 .setGlView(glView)
                 .setUrl(url)
-                .setSize(Publisher.Builder.DEFAULT_WIDTH, Publisher.Builder.DEFAULT_HEIGHT)
+                .setSize(Publisher.Builder.DEFAULT_HEIGHT, Publisher.Builder.DEFAULT_WIDTH)
                 .setAudioBitrate(Publisher.Builder.DEFAULT_AUDIO_BITRATE)
                 .setVideoBitrate(Publisher.Builder.DEFAULT_VIDEO_BITRATE)
                 .setCameraMode(Publisher.Builder.DEFAULT_MODE)
@@ -95,8 +96,14 @@ class VideoActivity : AppCompatActivity(), PublisherListener {
                 Toast.makeText(applicationContext, "切换摄像头", Toast.LENGTH_SHORT).show()
             }
         }
+
+        label.text = getString(R.string.publishing_label, 0L.format(), 0L.format())
+
+        startCounting()
+
+
         //TODO:测试代码
-        postDraw(CameraTestString.data)
+      //  postDraw(CameraTestString.data)
 
     }
     override fun onResume() {
@@ -188,20 +195,16 @@ class VideoActivity : AppCompatActivity(), PublisherListener {
         var result: String? = ""
         var `in`: BufferedReader? = null
         try {
+            drawerConnection = drawerUrl.openConnection() as HttpURLConnection
             // 设置通用的请求属性
-            drawerConnection.setRequestProperty("accept", "*/*")
-            drawerConnection.setRequestProperty("connection", "Keep-Alive")
-            drawerConnection.setRequestProperty(
-                "user-agent",
-                "okhttp/4.9.1"
-            )
+            drawerConnection!!.requestMethod = "GET";
             // 建立实际的连接
-            drawerConnection.connect()
+            drawerConnection!!.connect()
             // 获取所有响应头字段
             // 定义 BufferedReader输入流来读取URL的响应
             `in` = BufferedReader(
                 InputStreamReader(
-                    drawerConnection.inputStream
+                    drawerConnection!!.inputStream
                 )
             )
             var line: String?
@@ -219,6 +222,10 @@ class VideoActivity : AppCompatActivity(), PublisherListener {
                 e2.printStackTrace()
             }
         }
+        Log.e("Get Info", "requestDrawer: $result", )
+
+
+
         return result!!
     }
 
@@ -240,7 +247,12 @@ class VideoActivity : AppCompatActivity(), PublisherListener {
             //请求Data数据，更新绘制图案
             try {
                 val jsonData = JSONObject(data)
-                val list = jsonData.getString("list")
+                Log.e("JSON DATA", "postDraw: $jsonData")
+                val success = jsonData.getString("success")
+                if (success != "true")
+                    return@thread
+                val datas = jsonData.getJSONObject("data")
+                val list = datas.getString("list")
                 val jsonLists = JSONArray(list)
                 val dataArray = ArrayList<DataBean>()
                 for (i in 0 until jsonLists.length()){
@@ -295,6 +307,7 @@ class VideoActivity : AppCompatActivity(), PublisherListener {
                 }
                 cameraDrawer.updateData(dataArray)
             }catch (e : Exception){
+                e.printStackTrace()
                 runOnUiThread {
                     Toast.makeText(applicationContext, "解析服务器绘制数据异常\n 错误:${e.message}", Toast.LENGTH_SHORT).show()
                 }
