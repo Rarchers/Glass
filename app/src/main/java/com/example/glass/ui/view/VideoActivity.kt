@@ -1,7 +1,6 @@
 package com.example.glass.ui.view
 
-import android.app.ProgressDialog.show
-import android.content.pm.ActivityInfo
+
 import android.opengl.GLSurfaceView
 import android.os.Bundle
 import android.os.Handler
@@ -64,6 +63,29 @@ class VideoActivity : AppCompatActivity(), PublisherListener {
         cameraButton = findViewById(R.id.toggle_camera)
         label = findViewById(R.id.live_label)
         cameraDrawer = findViewById(R.id.cameraDrawer)
+
+
+        //尝试用反射来Hook一下Camera的参数设置
+        var cameraClient : Class<*>? = null
+        try {
+            cameraClient = Class.forName("com.takusemba.rtmppublisher.CameraClient")
+            val methods = cameraClient.declaredMethods
+            for (i in methods){
+                Log.e("CameraClient Method", "onCreate: $i", )
+            }
+
+
+
+        } catch (e: ClassNotFoundException) {
+            e.printStackTrace()
+        }
+
+
+
+
+
+
+
 
 
         if (url == "") {
@@ -222,7 +244,7 @@ class VideoActivity : AppCompatActivity(), PublisherListener {
                 e2.printStackTrace()
             }
         }
-        Log.e("Get Info", "requestDrawer: $result", )
+        Log.e("Get Info", "requestDrawer: $result")
 
 
 
