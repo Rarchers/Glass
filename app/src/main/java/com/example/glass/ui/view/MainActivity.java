@@ -1,7 +1,9 @@
 package com.example.glass.ui.view;
 
+import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 
+import android.Manifest;
 import android.app.Activity;
 import android.content.Intent;
 import android.os.Bundle;
@@ -24,6 +26,11 @@ import com.rokid.glass.speech.SpeechUserManager;
 import com.rokid.glass.speech.TtsCallBack;
 import com.rokid.glass.ui.button.GlassButton;
 
+import java.util.ArrayList;
+
+import top.iwill.simplepermission.IPermissionCallback;
+import top.iwill.simplepermission.PermissionUtilKt;
+
 public class MainActivity extends AppCompatActivity {
 
 
@@ -41,6 +48,23 @@ public class MainActivity extends AppCompatActivity {
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+
+        PermissionUtilKt.request(this
+                , new String[]{Manifest.permission.RECORD_AUDIO,Manifest.permission.CAMERA}, 2, new IPermissionCallback() {
+                    @Override
+                    public void onGranted(@NonNull ArrayList<? extends String> arrayList) {
+
+                    }
+
+                    @Override
+                    public void onDenied(@NonNull ArrayList<? extends String> arrayList) {
+                        Toast.makeText(getApplicationContext(), "必须同意以上权限", Toast.LENGTH_SHORT).show();
+                        finish();
+                    }
+                });
+
+
+
         configInstruct();
         initView();
 
