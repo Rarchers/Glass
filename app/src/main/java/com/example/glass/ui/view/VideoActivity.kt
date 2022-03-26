@@ -1,6 +1,7 @@
 package com.example.glass.ui.view
 
 
+import android.content.Intent
 import android.opengl.GLSurfaceView
 import android.os.Bundle
 import android.os.Handler
@@ -71,7 +72,7 @@ class VideoActivity : AppCompatActivity(), PublisherListener {
             cameraClient = Class.forName("com.takusemba.rtmppublisher.CameraClient")
             val methods = cameraClient.declaredMethods
             for (i in methods){
-                Log.e("CameraClient Method", "onCreate: $i", )
+                Log.e("CameraClient Method", "onCreate: $i")
             }
 
 
@@ -79,14 +80,6 @@ class VideoActivity : AppCompatActivity(), PublisherListener {
         } catch (e: ClassNotFoundException) {
             e.printStackTrace()
         }
-
-
-
-
-
-
-
-
 
         if (url == "") {
             Toast.makeText(this, R.string.error_empty_url, Toast.LENGTH_SHORT)
@@ -102,6 +95,8 @@ class VideoActivity : AppCompatActivity(), PublisherListener {
                 .setCameraMode(Publisher.Builder.DEFAULT_MODE)
                 .setListener(this)
                 .build()
+
+
 
             publishButton.setOnClickListener {
                 if (publisher.isPublishing) {
@@ -157,6 +152,11 @@ class VideoActivity : AppCompatActivity(), PublisherListener {
             .run { show() }
         updateControls()
         stopCounting()
+//        finish()
+//        val intent = Intent(applicationContext, VideoActivity::class.java)
+//        startActivity(intent)
+
+
     }
 
     override fun onFailedToConnect() {

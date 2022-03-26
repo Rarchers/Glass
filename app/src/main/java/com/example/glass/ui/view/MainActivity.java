@@ -16,7 +16,6 @@ import android.widget.Toast;
 
 import com.example.glass.R;
 
-import com.example.glass.application.InstructionApplication;
 import com.rokid.glass.instruct.InstructLifeManager;
 import com.rokid.glass.instruct.entity.EntityKey;
 import com.rokid.glass.instruct.entity.IInstructReceiver;
@@ -63,7 +62,7 @@ public class MainActivity extends AppCompatActivity {
                     }
                 });
 
-
+        Toast.makeText(getApplicationContext(), "所有权限已授取", Toast.LENGTH_SHORT).show();
 
         configInstruct();
         initView();

@@ -49,7 +49,7 @@ public class VideoPlayView extends View {
 
 
 
-        //TODO:请求服务器端图形和文字，并进行绘制,直接绘制到canvas上即可.可以拉一个接口或者方法来传参
+
         canvas.drawBitmap(VideoBit2, null, rectF, null);
 
         invalidate();

@@ -12,7 +12,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.example.glass.R;
-import com.example.glass.application.InstructionApplication;
+
 import com.example.glass.component.ultraviolet.bean.PicInfoPacket;
 import com.example.glass.component.ultraviolet.net.OnMsgReturnedListener;
 import com.example.glass.component.ultraviolet.net.TCPClient;
