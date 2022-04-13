@@ -39,6 +39,7 @@ import android.widget.ToggleButton;
 
 import com.example.glass.R;
 import com.example.glass.utils.GlobalConfig;
+import com.example.glass.utils.SaveImageUtils;
 import com.example.glass.utils.ThresholdHelp;
 import com.example.glass.utils.imagehelp.ImageHelp;
 
@@ -62,6 +63,8 @@ import com.rokid.glass.instruct.entity.EntityKey;
 import com.rokid.glass.instruct.entity.IInstructReceiver;
 import com.rokid.glass.instruct.entity.InstructEntity;
 import com.rokid.glass.ui.button.GlassButton;
+
+import java.io.IOException;
 
 
 public class InfraredActivity extends AppCompatActivity{
@@ -215,6 +218,7 @@ public class InfraredActivity extends AppCompatActivity{
         }
     };
 
+
     ThermalImageStreamListener streamingCallbackImpl
             = new ThermalImageStreamListener() {
         @Override
@@ -224,13 +228,22 @@ public class InfraredActivity extends AppCompatActivity{
                 JavaImageBuffer javaBuffer = thermalImage.getImage();
 
                 if (startPic){
-                    runOnUiThread(new Runnable() {
-                        @Override
-                        public void run() {
-                            Toast.makeText(InfraredActivity.this, "拍照上传！！", Toast.LENGTH_SHORT).show();
+
+
                             setText("点击了拍照上传");
-                        }
-                    });
+//                            android.graphics.Bitmap bmp = BitmapAndroid.createBitmap(javaBuffer).getBitMap();
+//                            SaveImageUtils.saveImageToGallery(InfraredActivity.this,bmp);
+
+                    try {
+                        thermalImage.saveAs(getApplicationContext().getFilesDir().getAbsolutePath()+"\\pic.jpg");
+                        setText("保存成功");
+                        setText("路径为："+getApplicationContext().getFilesDir().getAbsolutePath());
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                        setText("保存失败");
+                    }
+
+
                     startPic = false;
 
 
