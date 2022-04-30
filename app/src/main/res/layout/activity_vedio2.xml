@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="utf-8"?>
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/activity_example_rtmp"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    >
+
+  <RelativeLayout
+      android:layout_width="match_parent"
+      android:layout_height="match_parent">
+    <SurfaceView
+        android:id="@+id/surfaceView"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent" />
+
+
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:layout_alignParentBottom="true"
+        android:layout_margin="20dp"
+        android:gravity="center"
+        >
+
+
+
+      <Button
+          android:text="推流"
+          android:layout_width="wrap_content"
+          android:layout_height="wrap_content"
+          android:layout_marginRight="5dp"
+          android:id="@+id/b_start_stop"
+          />
+
+
+    </LinearLayout>
+
+  </RelativeLayout>
+
+
+
+
+
+  <com.example.glass.component.video.CameraDrawer
+      android:id="@+id/cameraDrawer"
+      android:layout_width="match_parent"
+      android:layout_height="match_parent">
+  </com.example.glass.component.video.CameraDrawer>
+
+
+</FrameLayout>

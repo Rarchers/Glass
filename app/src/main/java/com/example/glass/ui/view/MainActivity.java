@@ -129,7 +129,7 @@ public class MainActivity extends AppCompatActivity {
         Toast.makeText(activity, "暂未开放", Toast.LENGTH_SHORT).show();
     }
     private void openHelp(Activity activity){
-        Intent intent = new Intent(activity,VideoActivity.class);
+        Intent intent = new Intent(activity,VideoActivity2.class);
         startActivity(intent);
     }
 
